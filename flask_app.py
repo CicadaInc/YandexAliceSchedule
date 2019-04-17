@@ -41,7 +41,7 @@ def handle_dialog(res, req):
         sessionStorage[user_id]['mode'] = None  # What ability has activated by the user
 
         # First response with asking location of user
-        res['response']['text'] = 'Привет! Я могу показать расписание рейсов станции по адресу .......\n' \
+        res['response']['text'] = 'Привет! Я могу показать расписание рейсов станции по адресу и ...\n' \
                                   'Что вы хотите узнать?'
 
     else:
@@ -52,9 +52,11 @@ def handle_dialog(res, req):
 
             if {'расписание', 'рейсов', 'станции'}.issubset(tokens):
                 sessionStorage[user_id]['mode'] = 'OnceStationSchedule'
-                sessionStorage[user_id]['true_address'] = None  # User didn't wrote an address yet
+
+                # User didn't wrote an address yet
+                sessionStorage[user_id]['true_address'] = None
                 sessionStorage[user_id]['geo_response'] = None
-                sessionStorage[user_id]['try'] = 0  # First try to write address
+                sessionStorage[user_id]['try'] = 0
 
                 res['response']['text'] = 'Скажите примерный адрес станции'
 
@@ -64,82 +66,87 @@ def handle_dialog(res, req):
             # Block to show the races schedule of once station
 
             if not sessionStorage[user_id]['true_address']:
-                # Block to handle request where user has written an address
-
-                if not sessionStorage[user_id]['geo_response']:
-                    # First try
-
-                    address = ' '.join(tokens)
-
-                    # Form geocoder request to get coordinates of designated address
-                    geo_params = {
-                        'geocode': address,
-                        'format': 'json'
-                    }
-                    sessionStorage[user_id]['geo_response'] = \
-                        requests.get("https://geocode-maps.yandex.ru/1.x/", params=geo_params).json()[
-                            "response"]
-
-                    # Find toponym with index = try
-                    toponym = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][
-                        sessionStorage[user_id]['try']]
-
-                    res['response']['text'] = 'Вы имеете ввиду этот адрес: {}?'.format(
-                        toponym['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])
-
-                    # If user does not confirm the address we will try to get another
-                    sessionStorage[user_id]['try'] += 1
-
-                elif 'да' in tokens and 'нет' not in tokens:
-                    # If user confirmed address
-
-                    sessionStorage[user_id]['true_address'] = True  # Valid address
-                    lng, lat = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][
-                        sessionStorage[user_id]['try']]["GeoObject"]["Point"]["pos"].split()
-
-                    # #  Find the nearest station
-                    # schedule_params = {
-                    #     'apikey': '0737b4ea-ad09-4db2-bbc9-fcb2ae2db11a',
-                    #     'lat': lat,
-                    #     'lng': lng
-                    # }
-                    # schedule_response = requests.get("https://api.rasp.yandex.net/v3.0/nearest_stations/",
-                    #                                  params=schedule_params).json()
-                    # logging.info(schedule_response)
-                    # station = schedule_response['stations'][0]
-                    #
-                    # logging.info(station['code'])
-                    # res['response']['text'] = station['code']
-                    #
-                    # #  We has found a right station?
-                    # static_maps_params = {}
-
-                elif 'нет' in tokens and 'да' not in tokens:
-                    #  Handle the try to write address
-
-                    try:
-                        # Find toponym with index = try
-                        toponym = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][
-                            sessionStorage[user_id]['try']]
-
-                        res['response']['text'] = 'Вы имеете ввиду этот адрес: {}?'.format(
-                            toponym['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])
-
-                        # If user does not confirm the address we will try to get another
-                        sessionStorage[user_id]['try'] += 1
-                        if sessionStorage[user_id]['try'] == 5:  # Too many tries
-                            raise IndexError
-
-                    except IndexError:
-                        # We cant find anymore geo objects
-                        res['response']['text'] = 'Уточните адрес, пожалуйста'
-                        sessionStorage[user_id]["geo_response"] = None
-
-                else:
-                    res['response']['text'] = 'Не поняла ответа. Да или нет?'
+                handle_address(res, tokens, user_id)
 
             else:
                 res['response']['text'] = 'Не понимаю запроса'
+
+
+def handle_address(res, tokens, user_id):
+    # Function handles the request when user has written an address
+
+    if not sessionStorage[user_id]['geo_response']:
+        # First try
+
+        address = ' '.join(tokens)
+
+        # Form geocoder request to get coordinates of designated address
+        geo_params = {
+            'geocode': address,
+            'format': 'json'
+        }
+        sessionStorage[user_id]['geo_response'] = \
+            requests.get("https://geocode-maps.yandex.ru/1.x/", params=geo_params).json()["response"]
+
+        # Find toponym with index = try
+        user_try = sessionStorage[user_id]['try']
+        toponym = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][user_try]
+
+        res['response']['text'] = 'Вы имеете ввиду этот адрес: {}?'.format(
+            toponym['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])
+
+        # If user does not confirm the address we will try to get another
+        sessionStorage[user_id]['try'] += 1
+
+    elif 'да' in tokens and 'нет' not in tokens:
+        # If user confirmed address
+
+        sessionStorage[user_id]['true_address'] = True  # Valid address
+
+        user_try = sessionStorage[user_id]['try']
+        lng, lat = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][
+            user_try]["GeoObject"]["Point"]["pos"].split()
+
+        # #  Find the nearest station
+        # schedule_params = {
+        #     'apikey': '0737b4ea-ad09-4db2-bbc9-fcb2ae2db11a',
+        #     'lat': lat,
+        #     'lng': lng
+        # }
+        # schedule_response = requests.get("https://api.rasp.yandex.net/v3.0/nearest_stations/",
+        #                                  params=schedule_params).json()
+        # logging.info(schedule_response)
+        # station = schedule_response['stations'][0]
+        #
+        # logging.info(station['code'])
+        # res['response']['text'] = station['code']
+        #
+        # #  We has found a right station?
+        # static_maps_params = {}
+
+    elif 'нет' in tokens and 'да' not in tokens:
+        #  Handle the try to write address
+
+        try:
+            # Find toponym with index = try
+            toponym = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][
+                sessionStorage[user_id]['try']]
+
+            res['response']['text'] = 'Вы имеете ввиду этот адрес: {}?'.format(
+                toponym['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])
+
+            # If user does not confirm the address we will try to get another
+            sessionStorage[user_id]['try'] += 1
+            if sessionStorage[user_id]['try'] == 5:  # Too many tries
+                raise IndexError
+
+        except IndexError:
+            # We cant find anymore geo objects
+            res['response']['text'] = 'Уточните адрес, пожалуйста'
+            sessionStorage[user_id]["geo_response"] = None
+
+    else:
+        res['response']['text'] = 'Не поняла ответа. Да или нет?'
 
 
 if __name__ == "__main__":
