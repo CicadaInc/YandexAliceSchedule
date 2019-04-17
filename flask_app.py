@@ -53,7 +53,7 @@ def handle_dialog(res, req):
             if {'расписание', 'рейсов', 'станции'}.issubset(tokens):
                 sessionStorage[user_id]['mode'] = 'OnceStationSchedule'
                 sessionStorage[user_id]['true_address'] = None  # User didn't wrote an address yet
-                sessionStorage[user_id]['address'] = None
+                sessionStorage[user_id]['geo_response'] = None
                 sessionStorage[user_id]['try'] = 0  # First try to write address
 
                 res['response']['text'] = 'Скажите примерный адрес станции'
@@ -66,56 +66,80 @@ def handle_dialog(res, req):
             if not sessionStorage[user_id]['true_address']:
                 # Block to handle request where user has written an address
 
-                if 'да' in tokens and 'нет' not in tokens:
-                    # If user confirmed address
-                    sessionStorage[user_id]['true_address'] = True  # Valid address
+                if not sessionStorage[user_id]['geo_response']:
+                    # First try
 
-                else:
-                    #  Handle the try to write address
-                    try:
-                        if not sessionStorage[user_id]['address']:
-                            # First try
-                            address = ' '.join(tokens)
-                            sessionStorage[user_id]['address'] = address
-                        else:
-                            address = sessionStorage[user_id]['address']
+                    address = ' '.join(tokens)
 
-                        # Form geocoder request to get coordinates of designated address
-                        geo_params = {
-                            'geocode': address,
-                            'format': 'json'
-                        }
-                        geo_response = requests.get("https://geocode-maps.yandex.ru/1.x/", params=geo_params).json()[
+                    # Form geocoder request to get coordinates of designated address
+                    geo_params = {
+                        'geocode': address,
+                        'format': 'json'
+                    }
+                    sessionStorage[user_id]['geo_response'] = \
+                        requests.get("https://geocode-maps.yandex.ru/1.x/", params=geo_params).json()[
                             "response"]
-                        toponym = request['GeoObjectCollection']['featureMember'][sessionStorage[user_id]['try']]
-                        lng, lat = toponym["GeoObject"]["Point"]["pos"].split()
-                        logging.info(lng + ',' + lat)
+
+                    # Find toponym with index = try
+                    toponym = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][
+                        sessionStorage[user_id]['try']]
+
+                    res['response']['text'] = 'Вы имеете ввиду этот адрес: {}?'.format(
+                        toponym['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])
+
+                    # If user does not confirm the address we will try to get another
+                    sessionStorage[user_id]['try'] += 1
+
+                elif 'да' in tokens and 'нет' not in tokens:
+                    # If user confirmed address
+
+                    sessionStorage[user_id]['true_address'] = True  # Valid address
+                    lng, lat = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][
+                        sessionStorage[user_id]['try']]["GeoObject"]["Point"]["pos"].split()
+
+                    # #  Find the nearest station
+                    # schedule_params = {
+                    #     'apikey': '0737b4ea-ad09-4db2-bbc9-fcb2ae2db11a',
+                    #     'lat': lat,
+                    #     'lng': lng
+                    # }
+                    # schedule_response = requests.get("https://api.rasp.yandex.net/v3.0/nearest_stations/",
+                    #                                  params=schedule_params).json()
+                    # logging.info(schedule_response)
+                    # station = schedule_response['stations'][0]
+                    #
+                    # logging.info(station['code'])
+                    # res['response']['text'] = station['code']
+                    #
+                    # #  We has found a right station?
+                    # static_maps_params = {}
+
+                elif 'нет' in tokens and 'да' not in tokens:
+                    #  Handle the try to write address
+
+                    try:
+                        # Find toponym with index = try
+                        toponym = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][
+                            sessionStorage[user_id]['try']]
 
                         res['response']['text'] = 'Вы имеете ввиду этот адрес: {}?'.format(
                             toponym['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])
 
                         # If user does not confirm the address we will try to get another
                         sessionStorage[user_id]['try'] += 1
+                        if sessionStorage[user_id]['try'] == 5:  # Too many tries
+                            raise IndexError
+
                     except IndexError:
                         # We cant find anymore geo objects
                         res['response']['text'] = 'Уточните адрес, пожалуйста'
+                        sessionStorage[user_id]["geo_response"] = None
 
-                # #  Find the nearest station
-                # schedule_params = {
-                #     'apikey': '0737b4ea-ad09-4db2-bbc9-fcb2ae2db11a',
-                #     'lat': lat,
-                #     'lng': lng
-                # }
-                # schedule_response = requests.get("https://api.rasp.yandex.net/v3.0/nearest_stations/",
-                #                                  params=schedule_params).json()
-                # logging.info(schedule_response)
-                # station = schedule_response['stations'][0]
-                #
-                # logging.info(station['code'])
-                # res['response']['text'] = station['code']
-                #
-                # #  We has found a right station?
-                # static_maps_params = {}
+                else:
+                    res['response']['text'] = 'Не поняла ответа. Да или нет?'
+
+            else:
+                res['response']['text'] = 'Не понимаю запроса'
 
 
 if __name__ == "__main__":
