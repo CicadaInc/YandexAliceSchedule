@@ -58,7 +58,7 @@ def handle_dialog(res, req):
                 sessionStorage[user_id]['geo_response'] = None
                 sessionStorage[user_id]['try'] = 0
 
-                res['response']['text'] = 'Скажите примерный адрес станции'
+                res['response']['text'] = 'Скажите от какого адреса будет происходить поиск станций'
 
             # Here will be other abilities
 
@@ -66,10 +66,37 @@ def handle_dialog(res, req):
             # Block to show the races schedule of once station
 
             if not sessionStorage[user_id]['true_address']:
+                # User didn't wrote a station yet
+                sessionStorage[user_id]['true_station'] = False
+
                 handle_address(res, tokens, user_id)
 
             else:
-                res['response']['text'] = 'Не понимаю запроса'
+                handle_station(res, tokens, user_id)
+
+        else:
+            # Wrong request
+            res['response']['text'] = 'Не поняла запроса'
+
+
+def handle_station(res, tokens, user_id):
+    # Function to handles the sent station
+
+    # Requested name
+    station_name = ' '.join(tokens)
+
+    for station in sessionStorage[user_id]['stations_response']['stations']:
+        # Name from json-request
+        station_name1 = '{} {}'.format(station['station_type_name'], station['title']).lower()
+        station_name1 = ''.join([el for el in station_name1 if el == ' ' or el.isalnum()])
+
+        if station_name1 == station_name:
+            res['response']['text'] = 'Вы выбрали станцию {}.\n' \
+                                      'Скажите дату в порядке <год мес день>'.format(station['title'])
+            return
+
+    # We didn't find requested station
+    res['response']['text'] = 'Указанной станции не найдено. Введите полное имя станции'
 
 
 def handle_address(res, tokens, user_id):
@@ -78,25 +105,30 @@ def handle_address(res, tokens, user_id):
     if not sessionStorage[user_id]['geo_response']:
         # First try
 
-        address = ' '.join(tokens)
+        try:
+            address = ' '.join(tokens)
 
-        # Form geocoder request to get coordinates of designated address
-        geo_params = {
-            'geocode': address,
-            'format': 'json'
-        }
-        sessionStorage[user_id]['geo_response'] = \
-            requests.get("https://geocode-maps.yandex.ru/1.x/", params=geo_params).json()["response"]
+            # Form geocoder request to get coordinates of designated address
+            geo_params = {
+                'geocode': address,
+                'format': 'json'
+            }
+            sessionStorage[user_id]['geo_response'] = \
+                requests.get("https://geocode-maps.yandex.ru/1.x/", params=geo_params).json()["response"]
 
-        # Find toponym with index = try
-        user_try = sessionStorage[user_id]['try']
-        toponym = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][user_try]
+            # Find toponym with index = try
+            user_try = sessionStorage[user_id]['try']
+            toponym = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][user_try]
 
-        res['response']['text'] = 'Вы имеете ввиду этот адрес: {}?'.format(
-            toponym['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])
+            res['response']['text'] = 'Вы имеете ввиду этот адрес: {}?'.format(
+                toponym['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])
 
-        # If user does not confirm the address we will try to get another
-        sessionStorage[user_id]['try'] += 1
+            # If user does not confirm the address we will try to get another
+            sessionStorage[user_id]['try'] += 1
+
+        except IndexError:
+            sessionStorage[user_id]['geo_response'] = None
+            res['response']['text'] = 'Не поняла адреса'
 
     elif 'да' in tokens and 'нет' not in tokens:
         # If user confirmed address
@@ -107,22 +139,24 @@ def handle_address(res, tokens, user_id):
         lng, lat = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][
             user_try]["GeoObject"]["Point"]["pos"].split()
 
-        # #  Find the nearest station
-        # schedule_params = {
-        #     'apikey': '0737b4ea-ad09-4db2-bbc9-fcb2ae2db11a',
-        #     'lat': lat,
-        #     'lng': lng
-        # }
-        # schedule_response = requests.get("https://api.rasp.yandex.net/v3.0/nearest_stations/",
-        #                                  params=schedule_params).json()
-        # logging.info(schedule_response)
-        # station = schedule_response['stations'][0]
-        #
-        # logging.info(station['code'])
-        # res['response']['text'] = station['code']
-        #
-        # #  We has found a right station?
-        # static_maps_params = {}
+        #  Find the five nearest stations
+        schedule_params = {
+            'apikey': '0737b4ea-ad09-4db2-bbc9-fcb2ae2db11a',
+            'lat': lat,
+            'lng': lng
+        }
+        sessionStorage[user_id]['stations_response'] = requests.get(
+            "https://api.rasp.yandex.net/v3.0/nearest_stations/",
+            params=schedule_params).json()
+        stations = sessionStorage[user_id]['stations_response']['stations'][:5]
+
+        text_response = '5 ближайших станций: \n\n'
+        for station in stations:
+            text_response += '{} {}\n Расстояние: {} км\n\n'.format(station['station_type_name'], station['title'],
+                                                                    round(station['distance'], 3))
+        text_response += 'Скажите полное имя станции, чтобы узнать расписание ее рейсов'
+
+        res['response']['text'] = text_response
 
     elif 'нет' in tokens and 'да' not in tokens:
         #  Handle the try to write address
