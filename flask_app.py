@@ -71,12 +71,21 @@ def handle_dialog(res, req):
 
                 handle_address(res, tokens, user_id)
 
-            else:
+            elif not sessionStorage[user_id]['true_station']:
                 handle_station(res, tokens, user_id)
+
+                sessionStorage[user_id]['true_date'] = False
+
+            elif not sessionStorage[user_id]['true_date']:
+                handle_date(res, tokens, user_id)
 
         else:
             # Wrong request
             res['response']['text'] = 'Не поняла запроса'
+
+
+def handle_date(res, tokens, user_id):
+    res['response']['text'] = ' '.join(tokens)
 
 
 def handle_station(res, tokens, user_id):
@@ -92,7 +101,11 @@ def handle_station(res, tokens, user_id):
 
         if station_name1 == station_name:
             res['response']['text'] = 'Вы выбрали станцию {}.\n' \
-                                      'Скажите дату в порядке <год мес день>'.format(station['title'])
+                                      'Теперь укажите нужную вам дату. Сначала скажите год.'.format(station_name1)
+
+            sessionStorage[user_id]['true_station'] = True
+            sessionStorage[user_id]['station'] = station
+
             return
 
     # We didn't find requested station
@@ -152,8 +165,7 @@ def handle_address(res, tokens, user_id):
 
         text_response = '5 ближайших станций: \n\n'
         for station in stations:
-            text_response += '{} {}\n Расстояние: {} км\n\n'.format(station['station_type_name'], station['title'],
-                                                                    round(station['distance'], 3))
+            text_response += '{} {}\n\n'.format(station['station_type_name'], station['title'])
         text_response += 'Скажите полное имя станции, чтобы узнать расписание ее рейсов'
 
         res['response']['text'] = text_response
