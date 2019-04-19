@@ -46,12 +46,20 @@ def handle_dialog(res, req):
         res['response']['text'] = 'Привет! Я могу рассказать вам о нужной вам станции! ' \
                                   'Скажите адрес, от которого будет происходить поиск станций'
 
+        set_help_buttons(user_id, res)
+
     else:
         # Block to show the races schedule of once station
 
         tokens = req['request']['nlu']['tokens']
 
-        if not sessionStorage[user_id]['true_address']:
+        if {'пока', 'прощай'}.intersection(tokens) or {'до', 'скорого'}.issubset(tokens) \
+                or {'до', 'свидания'}.issubset(tokens):
+            # User said farewell
+            res['response']['text'] = 'Пока. Приятно было пообщаться'
+            res['response']['end_session'] = True
+
+        elif not sessionStorage[user_id]['true_address']:
             # User didn't wrote a station yet
             sessionStorage[user_id]['true_station'] = False
 
@@ -65,6 +73,8 @@ def handle_dialog(res, req):
 
         elif not sessionStorage[user_id]['true_date']:
             handle_date(res, tokens, user_id)
+
+        set_help_buttons(user_id, res)
 
 
 def handle_date(res, tokens, user_id):
@@ -179,6 +189,29 @@ def handle_address(res, tokens, user_id):
 
     else:
         res['response']['text'] = 'Не поняла ответа. Да или нет?'
+
+
+def set_help_buttons(user_id, res):
+    # This function add in response help-buttons according to user status
+
+    res['response']['buttons'] = [
+        {
+            'title': 'Пока',
+            'hide': True
+        }
+    ]
+
+    if not sessionStorage[user_id]['true_address'] and sessionStorage[user_id]['geo_response']:
+        res['response']['buttons'] += [
+            {
+                'title': 'Да',
+                'hide': True
+            },
+            {
+                'title': 'Нет',
+                'hide': True
+            }
+        ]
 
 
 if __name__ == "__main__":
