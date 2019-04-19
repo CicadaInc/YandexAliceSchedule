@@ -97,6 +97,7 @@ def handle_date(res, tokens, user_id):
 
 def handle_station(res, tokens, user_id):
     # Function to handles the sent station
+    # NEED FIX
 
     # Requested name
     station_name = ' '.join(tokens)
