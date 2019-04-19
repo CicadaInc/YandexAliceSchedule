@@ -119,9 +119,6 @@ def handle_address(res, tokens, user_id):
             res['response']['text'] = 'Вы имеете ввиду этот адрес: {}?'.format(
                 toponym['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])
 
-            # If user does not confirm the address we will try to get another
-            sessionStorage[user_id]['try'] += 1
-
         except IndexError:
             sessionStorage[user_id]['geo_response'] = None
             res['response']['text'] = 'Не поняла адреса'
@@ -148,7 +145,9 @@ def handle_address(res, tokens, user_id):
 
         text_response = '5 ближайших станций: \n\n'
         for station in stations:
-            text_response += '{} {}\n\n'.format(station['station_type_name'], station['title'])
+            distance = round(station['distance'], 3)
+            text_response += '{} {}\n' \
+                             'Расстояние: {} км\n\n'.format(station['station_type_name'], station['title'], distance)
         text_response += 'Скажите полное имя станции, чтобы узнать расписание ее рейсов'
 
         res['response']['text'] = text_response
@@ -157,6 +156,9 @@ def handle_address(res, tokens, user_id):
         #  Handle the try to write address
 
         try:
+            # We try to get another because user didn't confirmed an address
+            sessionStorage[user_id]['try'] += 1
+
             # Find toponym with index = try
             toponym = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][
                 sessionStorage[user_id]['try']]
@@ -173,6 +175,7 @@ def handle_address(res, tokens, user_id):
             # We cant find anymore geo objects
             res['response']['text'] = 'Уточните адрес, пожалуйста'
             sessionStorage[user_id]["geo_response"] = None
+            sessionStorage[user_id]['try'] = 0
 
     else:
         res['response']['text'] = 'Не поняла ответа. Да или нет?'
