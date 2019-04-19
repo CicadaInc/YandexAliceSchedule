@@ -41,6 +41,7 @@ def handle_dialog(res, req):
         # User din't wrote an address yet
         sessionStorage[user_id]['true_address'] = False
         sessionStorage[user_id]['geo_response'] = None
+        sessionStorage[user_id]['true_station'] = False
         sessionStorage[user_id]['try'] = 0
 
         res['response']['text'] = 'Привет! Я могу рассказать вам о нужной вам станции! ' \
@@ -53,13 +54,18 @@ def handle_dialog(res, req):
 
         tokens = req['request']['nlu']['tokens']
 
-        if {'изменить', 'адрес'}.intersection(tokens) or {'другой', 'адрес'}.intersection(tokens):
+        if {'изменить', 'адрес'}.issubset(tokens) or {'другой', 'адрес'}.issubset(tokens):
             # User want to edit the address (come back to begin of address select)
             sessionStorage[user_id]['true_address'] = False
             sessionStorage[user_id]['geo_response'] = None
             sessionStorage[user_id]['try'] = 0
 
             res['response']['text'] = 'Скажите адрес, от которого будет происходить поиск станций'
+
+        elif {'изменить', 'станцию'}.issubset(tokens) or {'другую', 'станцию'}.issubset(tokens):
+            sessionStorage[user_id]['true_station'] = False
+
+            add_stations_in_response(user_id, res)
 
         elif {'пока', 'прощай'}.intersection(tokens) or {'до', 'скорого'}.issubset(tokens) \
                 or {'до', 'свидания'}.issubset(tokens):
@@ -144,31 +150,7 @@ def handle_address(res, tokens, user_id):
     elif 'да' in tokens and 'нет' not in tokens:
         # If user confirmed address
 
-        sessionStorage[user_id]['true_address'] = True  # Valid address
-
-        user_try = sessionStorage[user_id]['try']
-        lng, lat = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][
-            user_try]["GeoObject"]["Point"]["pos"].split()
-
-        #  Find the five nearest stations
-        schedule_params = {
-            'apikey': '0737b4ea-ad09-4db2-bbc9-fcb2ae2db11a',
-            'lat': lat,
-            'lng': lng
-        }
-        sessionStorage[user_id]['stations_response'] = requests.get(
-            "https://api.rasp.yandex.net/v3.0/nearest_stations/",
-            params=schedule_params).json()
-        stations = sessionStorage[user_id]['stations_response']['stations'][:5]
-
-        text_response = '5 ближайших станций: \n\n'
-        for station in stations:
-            distance = round(station['distance'], 3)
-            text_response += '{} {}\n' \
-                             'Расстояние: {} км\n\n'.format(station['station_type_name'], station['title'], distance)
-        text_response += 'Скажите полное имя станции, чтобы узнать расписание ее рейсов'
-
-        res['response']['text'] = text_response
+        add_stations_in_response(user_id, res)
 
     elif 'нет' in tokens and 'да' not in tokens:
         #  Handle the try to write address
@@ -199,6 +181,34 @@ def handle_address(res, tokens, user_id):
         res['response']['text'] = 'Не поняла ответа. Да или нет?'
 
 
+def add_stations_in_response(user_id, res):
+    sessionStorage[user_id]['true_address'] = True  # Valid address
+
+    user_try = sessionStorage[user_id]['try']
+    lng, lat = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][
+        user_try]["GeoObject"]["Point"]["pos"].split()
+
+    #  Find the five nearest stations
+    schedule_params = {
+        'apikey': '0737b4ea-ad09-4db2-bbc9-fcb2ae2db11a',
+        'lat': lat,
+        'lng': lng
+    }
+    sessionStorage[user_id]['stations_response'] = requests.get(
+        "https://api.rasp.yandex.net/v3.0/nearest_stations/",
+        params=schedule_params).json()
+    stations = sessionStorage[user_id]['stations_response']['stations'][:5]
+
+    text_response = '5 ближайших станций: \n\n'
+    for station in stations:
+        distance = round(station['distance'], 3)
+        text_response += '{} {}\n' \
+                         'Расстояние: {} км\n\n'.format(station['station_type_name'], station['title'], distance)
+    text_response += 'Скажите полное имя станции, чтобы узнать расписание ее рейсов'
+
+    res['response']['text'] = text_response
+
+
 def set_help_buttons(user_id, res):
     # This function add in response help-buttons according to user status
 
@@ -224,6 +234,14 @@ def set_help_buttons(user_id, res):
         res['response']['buttons'] += [
             {
                 'title': 'Изменить адрес',
+                'hide': True
+            }
+        ]
+
+    if sessionStorage[user_id]['true_station']:
+        res['response']['buttons'] += [
+            {
+                'title': 'Изменить станцию',
                 'hide': True
             }
         ]
