@@ -34,54 +34,37 @@ def handle_dialog(res, req):
     user_id = req['session']['user_id']
 
     if req['session']['new']:
-        # Block for handle the new session of user
 
-        # Empty user_data (key = user_id)
+        # Empty storage of user
         sessionStorage[user_id] = {}
-        sessionStorage[user_id]['mode'] = None  # What ability has activated by the user
 
-        # First response with asking location of user
-        res['response']['text'] = 'Привет! Я могу показать расписание рейсов станции по адресу и ...\n' \
-                                  'Что вы хотите узнать?'
+        # User din't wrote an address yet
+        sessionStorage[user_id]['true_address'] = False
+        sessionStorage[user_id]['geo_response'] = None
+        sessionStorage[user_id]['try'] = 0
+
+        res['response']['text'] = 'Привет! Я могу рассказать вам о нужной вам станции! ' \
+                                  'Скажите адрес, от которого будет происходить поиск станций'
 
     else:
+        # Block to show the races schedule of once station
+
         tokens = req['request']['nlu']['tokens']
 
-        if not sessionStorage[user_id]['mode']:
-            # Block to handle what user wants to activate
+        if not sessionStorage[user_id]['true_address']:
+            # User didn't wrote a station yet
+            sessionStorage[user_id]['true_station'] = False
 
-            if {'расписание', 'рейсов', 'станции'}.issubset(tokens):
-                sessionStorage[user_id]['mode'] = 'OnceStationSchedule'
+            handle_address(res, tokens, user_id)
 
-                # User didn't wrote an address yet
-                sessionStorage[user_id]['true_address'] = None
-                sessionStorage[user_id]['geo_response'] = None
-                sessionStorage[user_id]['try'] = 0
+        elif not sessionStorage[user_id]['true_station']:
+            handle_station(res, tokens, user_id)
 
-                res['response']['text'] = 'Скажите от какого адреса будет происходить поиск станций'
+            # User din't wrote a date yet
+            sessionStorage[user_id]['true_date'] = False
 
-            # Here will be other abilities
-
-        elif sessionStorage[user_id]['mode'] == 'OnceStationSchedule':
-            # Block to show the races schedule of once station
-
-            if not sessionStorage[user_id]['true_address']:
-                # User didn't wrote a station yet
-                sessionStorage[user_id]['true_station'] = False
-
-                handle_address(res, tokens, user_id)
-
-            elif not sessionStorage[user_id]['true_station']:
-                handle_station(res, tokens, user_id)
-
-                sessionStorage[user_id]['true_date'] = False
-
-            elif not sessionStorage[user_id]['true_date']:
-                handle_date(res, tokens, user_id)
-
-        else:
-            # Wrong request
-            res['response']['text'] = 'Не поняла запроса'
+        elif not sessionStorage[user_id]['true_date']:
+            handle_date(res, tokens, user_id)
 
 
 def handle_date(res, tokens, user_id):
@@ -126,8 +109,8 @@ def handle_address(res, tokens, user_id):
                 'geocode': address,
                 'format': 'json'
             }
-            sessionStorage[user_id]['geo_response'] = \
-                requests.get("https://geocode-maps.yandex.ru/1.x/", params=geo_params).json()["response"]
+            sessionStorage[user_id]['geo_response'] = requests.get("https://geocode-maps.yandex.ru/1.x/",
+                                                                   params=geo_params).json()["response"]
 
             # Find toponym with index = try
             user_try = sessionStorage[user_id]['try']
