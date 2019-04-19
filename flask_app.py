@@ -53,23 +53,31 @@ def handle_dialog(res, req):
 
         tokens = req['request']['nlu']['tokens']
 
-        if {'пока', 'прощай'}.intersection(tokens) or {'до', 'скорого'}.issubset(tokens) \
+        if {'изменить', 'адрес'}.intersection(tokens) or {'другой', 'адрес'}.intersection(tokens):
+            # User want to edit the address (come back to begin of address select)
+            sessionStorage[user_id]['true_address'] = False
+            sessionStorage[user_id]['geo_response'] = None
+            sessionStorage[user_id]['try'] = 0
+
+            res['response']['text'] = 'Скажите адрес, от которого будет происходить поиск станций'
+
+        elif {'пока', 'прощай'}.intersection(tokens) or {'до', 'скорого'}.issubset(tokens) \
                 or {'до', 'свидания'}.issubset(tokens):
             # User said farewell
             res['response']['text'] = 'Пока. Приятно было пообщаться'
             res['response']['end_session'] = True
 
         elif not sessionStorage[user_id]['true_address']:
-            # User didn't wrote a station yet
+            # User didn't wrote a name of station yet
             sessionStorage[user_id]['true_station'] = False
 
             handle_address(res, tokens, user_id)
 
         elif not sessionStorage[user_id]['true_station']:
-            handle_station(res, tokens, user_id)
-
             # User din't wrote a date yet
             sessionStorage[user_id]['true_date'] = False
+
+            handle_station(res, tokens, user_id)
 
         elif not sessionStorage[user_id]['true_date']:
             handle_date(res, tokens, user_id)
@@ -182,7 +190,7 @@ def handle_address(res, tokens, user_id):
                 raise IndexError
 
         except IndexError:
-            # We cant find anymore geo objects
+            # We can't find anymore geo objects
             res['response']['text'] = 'Уточните адрес, пожалуйста'
             sessionStorage[user_id]["geo_response"] = None
             sessionStorage[user_id]['try'] = 0
@@ -201,14 +209,21 @@ def set_help_buttons(user_id, res):
         }
     ]
 
-    if not sessionStorage[user_id]['true_address'] and sessionStorage[user_id]['geo_response']:
+    if sessionStorage[user_id]['geo_response']:
+        if not sessionStorage[user_id]['true_address']:
+            res['response']['buttons'] += [
+                {
+                    'title': 'Да',
+                    'hide': True
+                },
+                {
+                    'title': 'Нет',
+                    'hide': True
+                },
+            ]
         res['response']['buttons'] += [
             {
-                'title': 'Да',
-                'hide': True
-            },
-            {
-                'title': 'Нет',
+                'title': 'Изменить адрес',
                 'hide': True
             }
         ]
