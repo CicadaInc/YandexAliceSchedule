@@ -212,6 +212,7 @@ def handle_address(res, tokens, user_id):
 
 
 def add_stations_in_response(user_id, res):
+    global stations_buttons
     sessionStorage[user_id]['true_address'] = True  # Valid address
 
     user_try = sessionStorage[user_id]['try']
@@ -230,14 +231,22 @@ def add_stations_in_response(user_id, res):
     stations = sessionStorage[user_id]['stations_response']['stations'][:5]
 
     text_response = '5 ближайших станций: \n\n'
+    stations_buttons = []
     for station in stations:
         distance = round(station['distance'], 3)
         text_response += '{} {}\n' \
                          'Расстояние: {} км\n\n'.format(station['station_type_name'],
                                                         station['title'], distance)
+        stations_buttons.append({
+            'title': station['station_type_name'] + ' ' + station['title'],
+            'hide': False})
     text_response += 'Скажите полное имя станции, чтобы узнать расписание ее рейсов'
 
     res['response']['text'] = text_response
+
+    print(stations_buttons)
+
+    res['response']['buttons'] = stations_buttons
 
 
 def set_help_buttons(user_id, res):
