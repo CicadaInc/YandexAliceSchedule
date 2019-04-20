@@ -47,7 +47,16 @@ def handle_dialog(res, req):
         res['response']['text'] = 'Привет! Я могу рассказать вам о нужной вам станции! ' \
                                   'Скажите адрес, от которого будет происходить поиск станций'
 
-        set_help_buttons(user_id, res)
+        res['response']['buttons'] = [
+            {
+                'title': 'Москва, ул. Льва Толстого, 16',
+                'hide': True
+            },
+            {
+                'title': 'Пока',
+                'hide': True
+            }
+        ]
 
     else:
         # Block to show the races schedule of once station
@@ -62,10 +71,24 @@ def handle_dialog(res, req):
 
             res['response']['text'] = 'Скажите адрес, от которого будет происходить поиск станций'
 
+            res['response']['buttons'] = [
+                {
+                    'title': 'Москва, ул. Льва Толстого, 16',
+                    'hide': True
+                }
+            ]
+
         elif {'изменить', 'станцию'}.issubset(tokens) or {'другую', 'станцию'}.issubset(tokens):
             sessionStorage[user_id]['true_station'] = False
 
             add_stations_in_response(user_id, res)
+
+            res['response']['buttons'] = [
+                {
+                    'title': 'Москва, ул. Льва Толстого, 16',
+                    'hide': True
+                }
+            ]
 
         elif {'пока', 'прощай'}.intersection(tokens) or {'до', 'скорого'}.issubset(tokens) \
                 or {'до', 'свидания'}.issubset(tokens):
@@ -88,7 +111,8 @@ def handle_dialog(res, req):
         elif not sessionStorage[user_id]['true_date']:
             handle_date(res, tokens, user_id)
 
-        set_help_buttons(user_id, res)
+        if not res['response']['end_session']:
+            set_help_buttons(user_id, res)
 
 
 def handle_date(res, tokens, user_id):
@@ -109,7 +133,8 @@ def handle_station(res, tokens, user_id):
 
         if station_name1 == station_name:
             res['response']['text'] = 'Вы выбрали станцию {}.\n' \
-                                      'Теперь укажите нужную вам дату. Сначала скажите год.'.format(station_name1)
+                                      'Теперь укажите нужную вам дату. Сначала скажите год.'.format(
+                station_name1)
 
             sessionStorage[user_id]['true_station'] = True
             sessionStorage[user_id]['station'] = station
@@ -134,12 +159,15 @@ def handle_address(res, tokens, user_id):
                 'geocode': address,
                 'format': 'json'
             }
-            sessionStorage[user_id]['geo_response'] = requests.get("https://geocode-maps.yandex.ru/1.x/",
-                                                                   params=geo_params).json()["response"]
+            sessionStorage[user_id]['geo_response'] = \
+                requests.get("https://geocode-maps.yandex.ru/1.x/",
+                             params=geo_params).json()["response"]
 
             # Find toponym with index = try
             user_try = sessionStorage[user_id]['try']
-            toponym = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][user_try]
+            toponym = \
+                sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][
+                    user_try]
 
             res['response']['text'] = 'Вы имеете ввиду этот адрес: {}?'.format(
                 toponym['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])
@@ -161,8 +189,9 @@ def handle_address(res, tokens, user_id):
             sessionStorage[user_id]['try'] += 1
 
             # Find toponym with index = try
-            toponym = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][
-                sessionStorage[user_id]['try']]
+            toponym = \
+                sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][
+                    sessionStorage[user_id]['try']]
 
             res['response']['text'] = 'Вы имеете ввиду этот адрес: {}?'.format(
                 toponym['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])
@@ -204,7 +233,8 @@ def add_stations_in_response(user_id, res):
     for station in stations:
         distance = round(station['distance'], 3)
         text_response += '{} {}\n' \
-                         'Расстояние: {} км\n\n'.format(station['station_type_name'], station['title'], distance)
+                         'Расстояние: {} км\n\n'.format(station['station_type_name'],
+                                                        station['title'], distance)
     text_response += 'Скажите полное имя станции, чтобы узнать расписание ее рейсов'
 
     res['response']['text'] = text_response
