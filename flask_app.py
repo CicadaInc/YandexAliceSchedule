@@ -2,6 +2,8 @@ from flask import Flask, request
 import logging
 import json
 import requests
+import string
+import re
 
 app = Flask(__name__)
 
@@ -124,12 +126,13 @@ def handle_station(res, tokens, user_id):
     # NEED FIX
 
     # Requested name
-    station_name = ' '.join(tokens)
+    station_name = re.sub(string.punctuation, '', ' '.join(tokens))
 
     for station in sessionStorage[user_id]['stations_response']['stations']:
         # Name from json-request
         station_name1 = '{} {}'.format(station['station_type_name'], station['title']).lower()
         station_name1 = ''.join([el for el in station_name1 if el == ' ' or el.isalnum()])
+        station_name1 = re.sub(string.punctuation, '', station_name1)
 
         if station_name1 == station_name:
             res['response']['text'] = 'Вы выбрали станцию {}.\n' \
