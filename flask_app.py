@@ -43,6 +43,7 @@ def handle_dialog(res, req):
         sessionStorage[user_id]['geo_response'] = None
         sessionStorage[user_id]['true_station'] = False
         sessionStorage[user_id]['first_station'] = True
+        sessionStorage[user_id]['trips'] = []
         sessionStorage[user_id]['try'] = 0
 
         res['response']['text'] = 'Привет! Я могу рассказать вам о нужной вам станции! ' \
@@ -91,9 +92,9 @@ def handle_dialog(res, req):
         elif not sessionStorage[user_id]['true_date']:
             handle_date(res, entities, user_id)
 
-        elif sessionStorage[user_id]['true_date']:
-            # Receiving the schedule of the specified station
-            handle_schedule(res, user_id)
+        # elif sessionStorage[user_id]['true_date']:
+        #     Receiving the schedule of the specified station
+        #     handle_schedule(res, user_id)
 
         if not res['response']['end_session']:
             set_help_buttons(user_id, res)
@@ -110,9 +111,20 @@ def handle_schedule(res, user_id):
         "https://api.rasp.yandex.net/v3.0/schedule/",
         params=schedule_params).json()
 
-    print(sessionStorage[user_id]['schedule_response'])
+    res['response']['text'] = ''
+    sessionStorage[user_id]['trips'] = []
 
-    res['response']['text'] = 'Смотри в консоль'
+    # print(sessionStorage[user_id]['schedule_response']['schedule'])
+    for way in sessionStorage[user_id]['schedule_response']['schedule']:
+        res['response']['text'] += way['thread']['short_title'] + '\n\n'
+        sessionStorage[user_id]['trips'].append(
+            {
+                "title": way['thread']['short_title'],
+                "hide": True
+            }
+        )
+
+    res['response']['text'] = res['response']['text'].rstrip('\n\n')
 
     return
 
@@ -130,13 +142,16 @@ def date_normalization(day, month, year):
 def handle_date(res, entities, user_id):
     for entity in entities:
         if entity['type'] == 'YANDEX.DATETIME':
-            res['response']['text'] = date_normalization(str(entity['value']['day']),
-                                                         str(entity['value']['month']),
-                                                         str(entity['value']['year']))
+            # res['response']['text'] = date_normalization(str(entity['value']['day']),
+            #                                              str(entity['value']['month']),
+            #                                              str(entity['value']['year']))
             sessionStorage[user_id]['date'] = date_normalization(str(entity['value']['day']),
                                                                  str(entity['value']['month']),
                                                                  str(entity['value']['year']))
             sessionStorage[user_id]['true_date'] = True
+
+            handle_schedule(res, user_id)
+
             return
     res['response']['text'] = 'Я не понимаю. Попробуйте сказать по-другому.'
 
@@ -263,6 +278,9 @@ def set_help_buttons(user_id, res):
     # This function add in response help-buttons according to user status
 
     res['response']['buttons'] = []
+
+    if len(sessionStorage[user_id]['trips']) != 0:
+        res['response']['buttons'] += sessionStorage[user_id]['trips']
 
     if sessionStorage[user_id]['first_station']:
         res['response']['buttons'] += [
