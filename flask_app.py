@@ -255,12 +255,7 @@ def add_stations_in_response(user_id, res):
 def set_help_buttons(user_id, res):
     # This function add in response help-buttons according to user status
 
-    res['response']['buttons'] = [
-        {
-            'title': 'Пока',
-            'hide': True
-        }
-    ]
+    res['response']['buttons'] = []
 
     if sessionStorage[user_id]['geo_response']:
         if not sessionStorage[user_id]['true_address']:
@@ -288,6 +283,13 @@ def set_help_buttons(user_id, res):
                 'hide': True
             }
         ]
+
+    res['response']['buttons'] += [
+        {
+            'title': 'Пока',
+            'hide': True
+        }
+    ]
 
 
 if __name__ == "__main__":
