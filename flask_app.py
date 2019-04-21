@@ -100,17 +100,42 @@ def handle_dialog(res, req):
 
 
 def handle_schedule(res, user_id):
-    search_params = {
+    schedule_params = {
         "apikey": "0737b4ea-ad09-4db2-bbc9-fcb2ae2db11a",
-        "station": "Here will be a coordinates from station"
+        "station": sessionStorage[user_id]['station']['code'],
+        "date": sessionStorage[user_id]['date']
     }
+
+    sessionStorage[user_id]['schedule_response'] = requests.get(
+        "https://api.rasp.yandex.net/v3.0/schedule/",
+        params=schedule_params).json()
+
+    print(sessionStorage[user_id]['schedule_response'])
+
+    res['response']['text'] = 'Смотри в консоль'
+
+    return
+
+
+# Date normalization to ISO 8601
+def date_normalization(day, month, year):
+    if len(month) == 1:
+        month = '0' + month
+    if len(day) == 1:
+        day = '0' + day
+
+    return year + '-' + month + '-' + day
 
 
 def handle_date(res, entities, user_id):
     for entity in entities:
         if entity['type'] == 'YANDEX.DATETIME':
-            res['response']['text'] = '{}.{}.{}'.format(entity['value']['day'], entity['value']['month'],
-                                                        entity['value']['year'])
+            res['response']['text'] = date_normalization(str(entity['value']['day']),
+                                                         str(entity['value']['month']),
+                                                         str(entity['value']['year']))
+            sessionStorage[user_id]['date'] = date_normalization(str(entity['value']['day']),
+                                                                 str(entity['value']['month']),
+                                                                 str(entity['value']['year']))
             sessionStorage[user_id]['true_date'] = True
             return
     res['response']['text'] = 'Я не понимаю. Попробуйте сказать по-другому.'
@@ -118,7 +143,6 @@ def handle_date(res, entities, user_id):
 
 def handle_station(res, tokens, user_id):
     # Function to handles the sent station
-    # NEED FIX
 
     # Requested name
     station_name = ' '.join(tokens)

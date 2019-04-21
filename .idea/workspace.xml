@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="753e9d64-07d5-474b-bb82-839130421cb0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/flask_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/flask_app.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -17,7 +16,7 @@
         <entry file="file://$PROJECT_DIR$/flask_app.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="208">
-              <caret line="100" lean-forward="true" selection-start-line="100" selection-end-line="100" />
+              <caret line="118" lean-forward="true" selection-start-line="118" selection-end-line="118" />
               <folding>
                 <element signature="e#0#32#0" expanded="true" />
               </folding>
@@ -53,12 +52,18 @@
       <find>Сначала скажите год.</find>
       <find>sessionStorage[user_id]['true_station']</find>
       <find>handle_station</find>
-      <find>req</find>
       <find>год</find>
-      <find>handle_date</find>
       <find>true_date</find>
       <find>api</find>
       <find>handle_schedule</find>
+      <find>req[</find>
+      <find>req</find>
+      <find>handle_dialog</find>
+      <find>Here w</find>
+      <find>request.json</find>
+      <find>Here</find>
+      <find>requests.get</find>
+      <find>handle_date</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -434,7 +439,7 @@
     <entry file="file://$PROJECT_DIR$/flask_app.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="208">
-          <caret line="100" lean-forward="true" selection-start-line="100" selection-end-line="100" />
+          <caret line="118" lean-forward="true" selection-start-line="118" selection-end-line="118" />
           <folding>
             <element signature="e#0#32#0" expanded="true" />
           </folding>
