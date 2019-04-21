@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="753e9d64-07d5-474b-bb82-839130421cb0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/flask_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/flask_app.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -16,8 +15,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/flask_app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="310">
-              <caret line="175" selection-start-line="175" selection-end-line="175" />
+            <state relative-caret-position="157">
+              <caret line="181" lean-forward="true" selection-start-line="181" selection-end-line="181" />
               <folding>
                 <element signature="e#0#32#0" expanded="true" />
               </folding>
@@ -29,19 +28,13 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>get</find>
-      <find>sessionStorage[user_id]['stations_buttons']</find>
-      <find>sessionStorage[user_id]['first_station']</find>
-      <find>Вы имеете ввиду этот адрес:</find>
       <find>Скажите адрес</find>
       <find>Вы выбрали</find>
       <find>Сначала скажите год.</find>
       <find>sessionStorage[user_id]['true_station']</find>
-      <find>handle_station</find>
       <find>год</find>
       <find>true_date</find>
       <find>api</find>
-      <find>handle_schedule</find>
       <find>req[</find>
       <find>req</find>
       <find>handle_dialog</find>
@@ -57,8 +50,14 @@
       <find>print</find>
       <find>date</find>
       <find>way</find>
-      <find>handle_date</find>
       <find>дату</find>
+      <find>ату</find>
+      <find>sessionStorage[user_id]['geo_response']</find>
+      <find>sessionStorage[user_id]['date']</find>
+      <find>handle_date</find>
+      <find>handle_station</find>
+      <find>handle_schedule</find>
+      <find>sessionStorage[user_id]['today_date']</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -433,8 +432,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/flask_app.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="310">
-          <caret line="175" selection-start-line="175" selection-end-line="175" />
+        <state relative-caret-position="157">
+          <caret line="181" lean-forward="true" selection-start-line="181" selection-end-line="181" />
           <folding>
             <element signature="e#0#32#0" expanded="true" />
           </folding>

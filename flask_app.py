@@ -2,6 +2,7 @@ from flask import Flask, request
 import logging
 import json
 import requests
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -44,6 +45,7 @@ def handle_dialog(res, req):
         sessionStorage[user_id]['true_station'] = False
         sessionStorage[user_id]['first_station'] = True
         sessionStorage[user_id]['trips'] = []
+        sessionStorage[user_id]['today_date'] = None
         sessionStorage[user_id]['try'] = 0
 
         res['response']['text'] = 'Привет! Я могу рассказать вам о нужной вам станции! ' \
@@ -92,9 +94,9 @@ def handle_dialog(res, req):
         elif not sessionStorage[user_id]['true_date']:
             handle_date(res, entities, user_id)
 
-        # elif sessionStorage[user_id]['true_date']:
-        #     Receiving the schedule of the specified station
-        #     handle_schedule(res, user_id)
+        elif sessionStorage[user_id]['true_date']:
+            # Receiving the schedule of the specified station
+            handle_schedule(res, user_id)
 
         if not res['response']['end_session']:
             set_help_buttons(user_id, res)
@@ -125,6 +127,8 @@ def handle_schedule(res, user_id):
         )
 
     res['response']['text'] = res['response']['text'].rstrip('\n\n')
+
+    sessionStorage[user_id]['today_date'] = None
 
     return
 
@@ -173,6 +177,8 @@ def handle_station(res, tokens, user_id):
 
             sessionStorage[user_id]['true_station'] = True
             sessionStorage[user_id]['station'] = station
+
+            sessionStorage[user_id]['today_date'] = str(datetime.today())[:11]
 
             return
 
@@ -278,6 +284,14 @@ def set_help_buttons(user_id, res):
     # This function add in response help-buttons according to user status
 
     res['response']['buttons'] = []
+
+    if sessionStorage[user_id]['today_date'] is not None:
+        res['response']['buttons'] += [
+            {
+                'title': sessionStorage[user_id]['today_date'],
+                'hide': True
+            }
+        ]
 
     if len(sessionStorage[user_id]['trips']) != 0:
         res['response']['buttons'] += sessionStorage[user_id]['trips']
