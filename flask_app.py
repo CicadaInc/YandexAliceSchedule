@@ -2,8 +2,6 @@ from flask import Flask, request
 import logging
 import json
 import requests
-import string
-import re
 
 app = Flask(__name__)
 
@@ -44,21 +42,13 @@ def handle_dialog(res, req):
         sessionStorage[user_id]['true_address'] = False
         sessionStorage[user_id]['geo_response'] = None
         sessionStorage[user_id]['true_station'] = False
+        sessionStorage[user_id]['first_station'] = True
         sessionStorage[user_id]['try'] = 0
 
         res['response']['text'] = 'Привет! Я могу рассказать вам о нужной вам станции! ' \
                                   'Скажите адрес, от которого будет происходить поиск станций'
 
-        res['response']['buttons'] = [
-            {
-                'title': 'Москва, ул. Льва Толстого, 16',
-                'hide': True
-            },
-            {
-                'title': 'Пока',
-                'hide': True
-            }
-        ]
+        set_help_buttons(user_id, res)
 
     else:
         # Block to show the races schedule of once station
@@ -69,33 +59,20 @@ def handle_dialog(res, req):
             # User want to edit the address (come back to begin of address select)
             sessionStorage[user_id]['true_address'] = False
             sessionStorage[user_id]['geo_response'] = None
+            sessionStorage[user_id]['first_station'] = True
             sessionStorage[user_id]['try'] = 0
 
             res['response']['text'] = 'Скажите адрес, от которого будет происходить поиск станций'
-
-            res['response']['buttons'] = [
-                {
-                    'title': 'Москва, ул. Льва Толстого, 16',
-                    'hide': True
-                }
-            ]
 
         elif {'изменить', 'станцию'}.issubset(tokens) or {'другую', 'станцию'}.issubset(tokens):
             sessionStorage[user_id]['true_station'] = False
 
             add_stations_in_response(user_id, res)
 
-            res['response']['buttons'] = [
-                {
-                    'title': 'Москва, ул. Льва Толстого, 16',
-                    'hide': True
-                }
-            ]
-
         elif {'пока', 'прощай'}.intersection(tokens) or {'до', 'скорого'}.issubset(tokens) \
                 or {'до', 'свидания'}.issubset(tokens):
             # User said farewell
-            res['response']['text'] = 'Пока. Приятно было пообщаться'
+            res['response']['text'] = 'До встречи, землянин ;)'
             res['response']['end_session'] = True
 
         elif not sessionStorage[user_id]['true_address']:
@@ -126,18 +103,16 @@ def handle_station(res, tokens, user_id):
     # NEED FIX
 
     # Requested name
-    station_name = re.sub(string.punctuation, '', ' '.join(tokens))
+    station_name = ' '.join(tokens)
 
     for station in sessionStorage[user_id]['stations_response']['stations']:
         # Name from json-request
         station_name1 = '{} {}'.format(station['station_type_name'], station['title']).lower()
         station_name1 = ''.join([el for el in station_name1 if el == ' ' or el.isalnum()])
-        station_name1 = re.sub(string.punctuation, '', station_name1)
 
         if station_name1 == station_name:
             res['response']['text'] = 'Вы выбрали станцию {}.\n' \
-                                      'Теперь укажите нужную вам дату. Сначала скажите год.'.format(
-                station_name1)
+                                      'Теперь укажите нужную вам дату. Сначала скажите год.'.format(station_name1)
 
             sessionStorage[user_id]['true_station'] = True
             sessionStorage[user_id]['station'] = station
@@ -162,18 +137,17 @@ def handle_address(res, tokens, user_id):
                 'geocode': address,
                 'format': 'json'
             }
-            sessionStorage[user_id]['geo_response'] = \
-                requests.get("https://geocode-maps.yandex.ru/1.x/",
-                             params=geo_params).json()["response"]
+            sessionStorage[user_id]['geo_response'] = requests.get("https://geocode-maps.yandex.ru/1.x/",
+                                                                   params=geo_params).json()["response"]
 
             # Find toponym with index = try
             user_try = sessionStorage[user_id]['try']
-            toponym = \
-                sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][
-                    user_try]
+            toponym = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][user_try]
 
             res['response']['text'] = 'Вы имеете ввиду этот адрес: {}?'.format(
                 toponym['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])
+
+            sessionStorage[user_id]['first_station'] = False
 
         except IndexError:
             sessionStorage[user_id]['geo_response'] = None
@@ -192,12 +166,13 @@ def handle_address(res, tokens, user_id):
             sessionStorage[user_id]['try'] += 1
 
             # Find toponym with index = try
-            toponym = \
-                sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][
-                    sessionStorage[user_id]['try']]
+            toponym = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][
+                sessionStorage[user_id]['try']]
 
             res['response']['text'] = 'Вы имеете ввиду этот адрес: {}?'.format(
                 toponym['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])
+
+            sessionStorage[user_id]['first_station'] = False
 
             # If user does not confirm the address we will try to get another
             sessionStorage[user_id]['try'] += 1
@@ -215,7 +190,6 @@ def handle_address(res, tokens, user_id):
 
 
 def add_stations_in_response(user_id, res):
-    global stations_buttons
     sessionStorage[user_id]['true_address'] = True  # Valid address
 
     user_try = sessionStorage[user_id]['try']
@@ -234,28 +208,27 @@ def add_stations_in_response(user_id, res):
     stations = sessionStorage[user_id]['stations_response']['stations'][:5]
 
     text_response = '5 ближайших станций: \n\n'
-    stations_buttons = []
     for station in stations:
         distance = round(station['distance'], 3)
         text_response += '{} {}\n' \
-                         'Расстояние: {} км\n\n'.format(station['station_type_name'],
-                                                        station['title'], distance)
-        stations_buttons.append({
-            'title': station['station_type_name'] + ' ' + station['title'],
-            'hide': False})
+                         'Расстояние: {} км\n\n'.format(station['station_type_name'], station['title'], distance)
     text_response += 'Скажите полное имя станции, чтобы узнать расписание ее рейсов'
 
     res['response']['text'] = text_response
-
-    print(stations_buttons)
-
-    res['response']['buttons'] = stations_buttons
 
 
 def set_help_buttons(user_id, res):
     # This function add in response help-buttons according to user status
 
     res['response']['buttons'] = []
+
+    if sessionStorage[user_id]['first_station']:
+        res['response']['buttons'] += [
+            {
+                'title': 'Москва, ул. Льва Толстого, 16',
+                'hide': True
+            }
+        ]
 
     if sessionStorage[user_id]['geo_response']:
         if not sessionStorage[user_id]['true_address']:
