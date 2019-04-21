@@ -54,6 +54,7 @@ def handle_dialog(res, req):
         # Block to show the races schedule of once station
 
         tokens = req['request']['nlu']['tokens']
+        entities = req['request']['nlu']['entities']
 
         if {'изменить', 'адрес'}.issubset(tokens) or {'другой', 'адрес'}.issubset(tokens):
             # User want to edit the address (come back to begin of address select)
@@ -82,20 +83,37 @@ def handle_dialog(res, req):
             handle_address(res, tokens, user_id)
 
         elif not sessionStorage[user_id]['true_station']:
-            # User din't wrote a date yet
+            # User didn't wrote a date yet
             sessionStorage[user_id]['true_date'] = False
 
             handle_station(res, tokens, user_id)
 
         elif not sessionStorage[user_id]['true_date']:
-            handle_date(res, tokens, user_id)
+            handle_date(res, entities, user_id)
+
+        elif sessionStorage[user_id]['true_date']:
+            # Receiving the schedule of the specified station
+            handle_schedule(res, user_id)
 
         if not res['response']['end_session']:
             set_help_buttons(user_id, res)
 
 
-def handle_date(res, tokens, user_id):
-    res['response']['text'] = ' '.join(tokens)
+def handle_schedule(res, user_id):
+    search_params = {
+        "apikey": "0737b4ea-ad09-4db2-bbc9-fcb2ae2db11a",
+        "station": "Here will be a coordinates from station"
+    }
+
+
+def handle_date(res, entities, user_id):
+    for entity in entities:
+        if entity['type'] == 'YANDEX.DATETIME':
+            res['response']['text'] = '{}.{}.{}'.format(entity['value']['day'], entity['value']['month'],
+                                                        entity['value']['year'])
+            sessionStorage[user_id]['true_date'] = True
+            return
+    res['response']['text'] = 'Я не понимаю. Попробуйте сказать по-другому.'
 
 
 def handle_station(res, tokens, user_id):
@@ -111,8 +129,8 @@ def handle_station(res, tokens, user_id):
         station_name1 = ''.join([el for el in station_name1 if el == ' ' or el.isalnum()])
 
         if station_name1 == station_name:
-            res['response']['text'] = 'Вы выбрали станцию {}.\n' \
-                                      'Теперь укажите нужную вам дату. Сначала скажите год.'.format(station_name1)
+            res['response']['text'] = 'Вы выбрали станцию "{}".\n' \
+                                      'Теперь скажите мне нужную дату.'.format(station_name1)
 
             sessionStorage[user_id]['true_station'] = True
             sessionStorage[user_id]['station'] = station
