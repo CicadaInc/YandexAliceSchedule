@@ -43,11 +43,10 @@ def handle_dialog(res, req):
         sessionStorage[user_id]['geo_response'] = None
         sessionStorage[user_id]['true_address'] = False
         sessionStorage[user_id]['true_station'] = False
-        sessionStorage[user_id]['true_datetime'] = False
         sessionStorage[user_id]['test'] = True
         sessionStorage[user_id]['try'] = 0
 
-        res['response']['text'] = 'Привет! Я могу рассказать вам о нужной вам станции! ' \
+        res['response']['text'] = 'Привет! Я могу рассказать о нужной вам станции! ' \
                                   'Скажите адрес, от которого будет происходить поиск станций'
 
         set_help_buttons(user_id, res)
@@ -61,6 +60,7 @@ def handle_dialog(res, req):
         if {'изменить', 'адрес'}.issubset(tokens) or {'другой', 'адрес'}.issubset(tokens):
             # User want to edit the address (come back to begin of address select)
             sessionStorage[user_id]['true_address'] = False
+            sessionStorage[user_id]['true_station'] = False
             sessionStorage[user_id]['geo_response'] = None
             sessionStorage[user_id]['test'] = True
             sessionStorage[user_id]['try'] = 0
@@ -70,7 +70,7 @@ def handle_dialog(res, req):
         elif {'изменить', 'станцию'}.issubset(tokens) or {'другую', 'станцию'}.issubset(tokens):
             sessionStorage[user_id]['true_station'] = False
 
-            add_stations_in_response(user_id, res)
+            receive_stations(user_id, res)
 
         elif {'пока', 'прощай'}.intersection(tokens) or {'до', 'скорого'}.issubset(tokens) \
                 or {'до', 'свидания'}.issubset(tokens):
@@ -85,12 +85,9 @@ def handle_dialog(res, req):
             handle_address(res, tokens, user_id)
 
         elif not sessionStorage[user_id]['true_station']:
-            # User didn't wrote a date yet
-            sessionStorage[user_id]['true_datetime'] = False
-
             handle_station(res, tokens, user_id)
 
-        elif not sessionStorage[user_id]['true_datetime']:
+        else:
             # Receiving the schedule of the specified station, date and time
 
             handle_datetime(res, entities, user_id)
@@ -127,7 +124,7 @@ def receive_schedule(res, user_id):
             ways.append(way)
 
     if len(ways) == 0:
-        res['response']['text'] = 'Рейсов не найдено'
+        res['response']['text'] = 'Рейсов не найдено. '
     else:
         ways = ways[:10]  # Nearlier 10 ways
         res['response']['text'] = 'Десять ближайших рейсов:\n\n'
@@ -135,7 +132,8 @@ def receive_schedule(res, user_id):
         for way in ways:
             departure = way['departure'][way['departure'].find('T') + 1: way['departure'].find('+')]
             res['response']['text'] += '{}\nОтправление в {}\n\n'.format(way['thread']['short_title'], departure)
-        res['response']['text'] = res['response']['text'].rstrip('\n\n')
+    res['response']['text'] += 'Можете сказать другие дату и время. ' \
+                               'Например: \"Пятое третье две тысячи девятнадцатое ноль часов ноль минут\"'
 
 
 # Date normalization to ISO 8601
@@ -173,7 +171,6 @@ def handle_datetime(res, entities, user_id):
                                                                      str(entity['value']['year']))
                 sessionStorage[user_id]['time'] = time_normalization(str(entity['value']['hour']),
                                                                      str(entity['value']['minute']))
-                sessionStorage[user_id]['true_datetime'] = True
 
                 receive_schedule(res, user_id)
 
@@ -242,7 +239,7 @@ def handle_address(res, tokens, user_id):
     elif 'да' in tokens and 'нет' not in tokens:
         # If user confirmed address
 
-        add_stations_in_response(user_id, res)
+        receive_stations(user_id, res)
 
     elif 'нет' in tokens and 'да' not in tokens:
         #  Handle the try to write address
@@ -275,7 +272,7 @@ def handle_address(res, tokens, user_id):
         res['response']['text'] = 'Не поняла ответа. Да или нет?'
 
 
-def add_stations_in_response(user_id, res):
+def receive_stations(user_id, res):
     sessionStorage[user_id]['true_address'] = True  # Valid address
 
     user_try = sessionStorage[user_id]['try']
@@ -308,10 +305,10 @@ def set_help_buttons(user_id, res):
 
     res['response']['buttons'] = []
 
-    if sessionStorage[user_id]['true_station'] and not sessionStorage[user_id]['true_datetime']:
+    if sessionStorage[user_id]['true_station']:
         res['response']['buttons'] += [
             {
-                'title': str(datetime.today())[:11],
+                'title': '{} {}'.format(datetime.today().date(), str(datetime.today().time())[:-10]),
                 'hide': True
             }
         ]
