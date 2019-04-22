@@ -43,9 +43,7 @@ def handle_dialog(res, req):
         sessionStorage[user_id]['true_address'] = False
         sessionStorage[user_id]['geo_response'] = None
         sessionStorage[user_id]['true_station'] = False
-        sessionStorage[user_id]['first_station'] = True
-        sessionStorage[user_id]['trips'] = []
-        sessionStorage[user_id]['today_date'] = None
+        sessionStorage[user_id]['test'] = True
         sessionStorage[user_id]['try'] = 0
 
         res['response']['text'] = 'Привет! Я могу рассказать вам о нужной вам станции! ' \
@@ -63,7 +61,7 @@ def handle_dialog(res, req):
             # User want to edit the address (come back to begin of address select)
             sessionStorage[user_id]['true_address'] = False
             sessionStorage[user_id]['geo_response'] = None
-            sessionStorage[user_id]['first_station'] = True
+            sessionStorage[user_id]['test'] = True
             sessionStorage[user_id]['try'] = 0
 
             res['response']['text'] = 'Скажите адрес, от которого будет происходить поиск станций'
@@ -114,21 +112,12 @@ def handle_schedule(res, user_id):
         params=schedule_params).json()
 
     res['response']['text'] = ''
-    sessionStorage[user_id]['trips'] = []
 
     # print(sessionStorage[user_id]['schedule_response']['schedule'])
     for way in sessionStorage[user_id]['schedule_response']['schedule']:
         res['response']['text'] += way['thread']['short_title'] + '\n\n'
-        sessionStorage[user_id]['trips'].append(
-            {
-                "title": way['thread']['short_title'],
-                "hide": True
-            }
-        )
 
     res['response']['text'] = res['response']['text'].rstrip('\n\n')
-
-    sessionStorage[user_id]['today_date'] = None
 
     return
 
@@ -178,8 +167,6 @@ def handle_station(res, tokens, user_id):
             sessionStorage[user_id]['true_station'] = True
             sessionStorage[user_id]['station'] = station
 
-            sessionStorage[user_id]['today_date'] = str(datetime.today())[:11]
-
             return
 
     # We didn't find requested station
@@ -210,7 +197,7 @@ def handle_address(res, tokens, user_id):
             res['response']['text'] = 'Вы имеете ввиду этот адрес: {}?'.format(
                 toponym['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])
 
-            sessionStorage[user_id]['first_station'] = False
+            sessionStorage[user_id]['test'] = False
 
         except IndexError:
             sessionStorage[user_id]['geo_response'] = None
@@ -235,7 +222,7 @@ def handle_address(res, tokens, user_id):
             res['response']['text'] = 'Вы имеете ввиду этот адрес: {}?'.format(
                 toponym['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])
 
-            sessionStorage[user_id]['first_station'] = False
+            sessionStorage[user_id]['test'] = False
 
             # If user does not confirm the address we will try to get another
             sessionStorage[user_id]['try'] += 1
@@ -285,18 +272,15 @@ def set_help_buttons(user_id, res):
 
     res['response']['buttons'] = []
 
-    if sessionStorage[user_id]['today_date'] is not None:
+    if sessionStorage[user_id]['true_address'] and not sessionStorage[user_id]['true_date']:
         res['response']['buttons'] += [
             {
-                'title': sessionStorage[user_id]['today_date'],
+                'title': str(datetime.today())[:11],
                 'hide': True
             }
         ]
 
-    if len(sessionStorage[user_id]['trips']) != 0:
-        res['response']['buttons'] += sessionStorage[user_id]['trips']
-
-    if sessionStorage[user_id]['first_station']:
+    if sessionStorage[user_id]['test']:
         res['response']['buttons'] += [
             {
                 'title': 'Москва, ул. Льва Толстого, 16',
@@ -331,6 +315,7 @@ def set_help_buttons(user_id, res):
             }
         ]
 
+    # User can say farewell at any stage
     res['response']['buttons'] += [
         {
             'title': 'Пока',
