@@ -39,10 +39,11 @@ def handle_dialog(res, req):
         # Empty storage of user
         sessionStorage[user_id] = {}
 
-        # User din't wrote an address yet
-        sessionStorage[user_id]['true_address'] = False
+        # User din't wrote any info yet
         sessionStorage[user_id]['geo_response'] = None
+        sessionStorage[user_id]['true_address'] = False
         sessionStorage[user_id]['true_station'] = False
+        sessionStorage[user_id]['true_datetime'] = False
         sessionStorage[user_id]['test'] = True
         sessionStorage[user_id]['try'] = 0
 
@@ -85,45 +86,62 @@ def handle_dialog(res, req):
 
         elif not sessionStorage[user_id]['true_station']:
             # User didn't wrote a date yet
-            sessionStorage[user_id]['true_date'] = False
+            sessionStorage[user_id]['true_datetime'] = False
 
             handle_station(res, tokens, user_id)
 
-        elif not sessionStorage[user_id]['true_date']:
-            handle_date(res, entities, user_id)
+        elif not sessionStorage[user_id]['true_datetime']:
+            # Receiving the schedule of the specified station, date and time
 
-        elif sessionStorage[user_id]['true_date']:
-            # Receiving the schedule of the specified station
-            handle_schedule(res, user_id)
+            handle_datetime(res, entities, user_id)
 
         if not res['response']['end_session']:
             set_help_buttons(user_id, res)
 
 
-def handle_schedule(res, user_id):
+def receive_schedule(res, user_id):
+    # Form schedule response
     schedule_params = {
         "apikey": "0737b4ea-ad09-4db2-bbc9-fcb2ae2db11a",
         "station": sessionStorage[user_id]['station']['code'],
         "date": sessionStorage[user_id]['date']
     }
-
     sessionStorage[user_id]['schedule_response'] = requests.get(
         "https://api.rasp.yandex.net/v3.0/schedule/",
         params=schedule_params).json()
 
-    res['response']['text'] = ''
+    # User time
+    user_time = sessionStorage[user_id]['time']  # Formatted
+    h1, m1 = map(int, user_time.split(':'))  # Integer
 
-    # print(sessionStorage[user_id]['schedule_response']['schedule'])
+    # Ways sorted by time
+    ways = []
+
     for way in sessionStorage[user_id]['schedule_response']['schedule']:
-        res['response']['text'] += way['thread']['short_title'] + '\n\n'
+        # Departure time
+        departure = way['departure'][way['departure'].find('T') + 1: way['departure'].find('+')]  # Formatted
+        h2, m2 = map(int, departure.split(':')[:-1])  # Integer
 
-    res['response']['text'] = res['response']['text'].rstrip('\n\n')
+        # If departure time is later then user's time
+        if h2 > h1 or (h2 == h1 and m2 >= m1):
+            ways.append(way)
 
-    return
+    if len(ways) == 0:
+        res['response']['text'] = 'Рейсов не найдено'
+    else:
+        ways = ways[:10]  # Nearlier 10 ways
+        res['response']['text'] = 'Десять ближайших рейсов:\n\n'
+        # Form text response
+        for way in ways:
+            departure = way['departure'][way['departure'].find('T') + 1: way['departure'].find('+')]
+            res['response']['text'] += '{}\nОтправление в {}\n\n'.format(way['thread']['short_title'], departure)
+        res['response']['text'] = res['response']['text'].rstrip('\n\n')
 
 
 # Date normalization to ISO 8601
 def date_normalization(day, month, year):
+    # String date formatting
+
     if len(month) == 1:
         month = '0' + month
     if len(day) == 1:
@@ -132,21 +150,37 @@ def date_normalization(day, month, year):
     return year + '-' + month + '-' + day
 
 
-def handle_date(res, entities, user_id):
-    for entity in entities:
-        if entity['type'] == 'YANDEX.DATETIME':
-            # res['response']['text'] = date_normalization(str(entity['value']['day']),
-            #                                              str(entity['value']['month']),
-            #                                              str(entity['value']['year']))
-            sessionStorage[user_id]['date'] = date_normalization(str(entity['value']['day']),
-                                                                 str(entity['value']['month']),
-                                                                 str(entity['value']['year']))
-            sessionStorage[user_id]['true_date'] = True
+# Time normalization to ISO 8601
+def time_normalization(hour, minute):
+    # String time formatting
 
-            handle_schedule(res, user_id)
+    if len(hour) == 1:
+        hour = '0' + hour
+    if len(minute) == 1:
+        minute = '0' + minute
 
-            return
-    res['response']['text'] = 'Я не понимаю. Попробуйте сказать по-другому.'
+    return hour + ':' + minute
+
+
+def handle_datetime(res, entities, user_id):
+    # This function to format and handle date and time (write them in storage)
+
+    try:
+        for entity in entities:
+            if entity['type'] == 'YANDEX.DATETIME':
+                sessionStorage[user_id]['date'] = date_normalization(str(entity['value']['day']),
+                                                                     str(entity['value']['month']),
+                                                                     str(entity['value']['year']))
+                sessionStorage[user_id]['time'] = time_normalization(str(entity['value']['hour']),
+                                                                     str(entity['value']['minute']))
+                sessionStorage[user_id]['true_datetime'] = True
+
+                receive_schedule(res, user_id)
+
+                return
+        raise KeyError
+    except KeyError:
+        res['response']['text'] = 'Я не понимаю. Попробуйте сказать по-другому.'
 
 
 def handle_station(res, tokens, user_id):
@@ -162,7 +196,9 @@ def handle_station(res, tokens, user_id):
 
         if station_name1 == station_name:
             res['response']['text'] = 'Вы выбрали станцию "{}".\n' \
-                                      'Теперь скажите мне нужную дату.'.format(station_name1)
+                                      'Теперь скажите мне нужные вам дату и время\n' \
+                                      'Например: \"Пятое третье две тысячи девятнадцатое ' \
+                                      'ноль часов ноль минут\".'.format(station_name1)
 
             sessionStorage[user_id]['true_station'] = True
             sessionStorage[user_id]['station'] = station
@@ -170,7 +206,7 @@ def handle_station(res, tokens, user_id):
             return
 
     # We didn't find requested station
-    res['response']['text'] = 'Указанной станции не найдено. Введите полное имя станции'
+    res['response']['text'] = 'Указанной станции не найдено. Скажите полное имя станции'
 
 
 def handle_address(res, tokens, user_id):
@@ -272,7 +308,7 @@ def set_help_buttons(user_id, res):
 
     res['response']['buttons'] = []
 
-    if sessionStorage[user_id]['true_address'] and not sessionStorage[user_id]['true_date']:
+    if sessionStorage[user_id]['true_station'] and not sessionStorage[user_id]['true_datetime']:
         res['response']['buttons'] += [
             {
                 'title': str(datetime.today())[:11],
