@@ -113,26 +113,32 @@ def receive_schedule(res, user_id):
     # Ways sorted by time
     ways = []
 
-    for way in sessionStorage[user_id]['schedule_response']['schedule']:
-        # Departure time
-        departure = way['departure'][way['departure'].find('T') + 1: way['departure'].find('+')]  # Formatted
-        h2, m2 = map(int, departure.split(':')[:-1])  # Integer
+    try:
+        for way in sessionStorage[user_id]['schedule_response']['schedule']:
+            # Departure time
+            departure = way['departure'][way['departure'].find('T') + 1: way['departure'].find('+')]  # Formatted
+            h2, m2 = map(int, departure.split(':')[:-1])  # Integer
 
-        # If departure time is later then user's time
-        if h2 > h1 or (h2 == h1 and m2 >= m1):
-            ways.append(way)
+            # If departure time is later then user's time
+            if h2 > h1 or (h2 == h1 and m2 >= m1):
+                ways.append(way)
 
-    if len(ways) == 0:
-        res['response']['text'] = 'Рейсов не найдено. '
-    else:
-        ways = ways[:10]  # Nearlier 10 ways
-        res['response']['text'] = 'Десять ближайших рейсов:\n\n'
-        # Form text response
-        for way in ways:
-            departure = way['departure'][way['departure'].find('T') + 1: way['departure'].find('+')]
-            res['response']['text'] += '{}\nОтправление в {}\n\n'.format(way['thread']['short_title'], departure)
-    res['response']['text'] += 'Можете сказать другие дату и время. ' \
-                               'Например: \"Пятое третье две тысячи девятнадцатое ноль часов ноль минут\"'
+        if len(ways) == 0:
+            res['response']['text'] = 'Рейсов не найдено. '
+        else:
+            ways = ways[:10]  # Nearlier 10 ways
+            res['response']['text'] = 'Десять ближайших рейсов:\n\n'
+            # Form text response
+            for way in ways:
+                departure = way['departure'][way['departure'].find('T') + 1: way['departure'].find('+')]
+                res['response']['text'] += '{}\nОтправление в {}\n\n'.format(way['thread']['short_title'], departure)
+        res['response']['text'] += 'Можете сказать другие дату и время. ' \
+                                   'Например: \"Пятое третье две тысячи девятнадцатое ноль часов ноль минут\"' \
+                                   '(<день> <мес> <год> <часы> <мин>)'
+    except KeyError:
+        res['response'][
+            'text'] = 'Указана недопустимая дата.\n' \
+                      ' Доступен выбор даты на 30 дней назад и 11 месяцев вперед от текущей даты'
 
 
 # Date normalization to ISO 8601
@@ -162,12 +168,17 @@ def time_normalization(hour, minute):
 def handle_datetime(res, user_id, tokens):
     # This function to format and handle date and time (write them in storage)
 
-    # Without entities because this entities is genial, really genial, really don't work
-    day, month, year, hour, minute = tokens
-    sessionStorage[user_id]['date'] = date_normalization(day, month, year)
-    sessionStorage[user_id]['time'] = time_normalization(hour, minute)
+    try:
+        # Without entities because this entities is genial, really genial, really don't work
+        day, month, year, hour, minute = tokens
+        sessionStorage[user_id]['date'] = date_normalization(day, month, year)
+        sessionStorage[user_id]['time'] = time_normalization(hour, minute)
 
-    receive_schedule(res, user_id)
+        receive_schedule(res, user_id)
+    except ValueError:
+        res['response']['text'] = 'Я вас не понимаю. Скажите правильно!\n' \
+                                  'Например: \"Пятое третье две тысячи девятнадцатое ноль часов ноль минут\"' \
+                                  '(<день> <мес> <год> <часы> <мин>)'
 
 
 def handle_station(res, tokens, user_id):
