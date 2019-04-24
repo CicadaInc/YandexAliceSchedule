@@ -308,14 +308,6 @@ def set_help_buttons(user_id, res):
 
     res['response']['buttons'] = []
 
-    if sessionStorage[user_id]['true_station']:
-        res['response']['buttons'] += [
-            {
-                'title': '{} {}'.format(datetime.today().date(), str(datetime.today().time())[:-10]),
-                'hide': True
-            }
-        ]
-
     if sessionStorage[user_id]['test']:
         res['response']['buttons'] += [
             {
