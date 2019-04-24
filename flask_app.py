@@ -186,10 +186,13 @@ def handle_station(res, tokens, user_id):
     # Requested name
     station_name = ' '.join(tokens)
 
-    for station in sessionStorage[user_id]['stations_response']['stations']:
+    logging.info(station_name)
+
+    for station in sessionStorage[user_id]['stations_response']['stations'][:5]:
         # Name from json-request
-        station_name1 = '{} {}'.format(station['station_type_name'], station['title']).lower()
+        station_name1 = '{} {}'.format(station['station_type_name'], station['title']).lower().replace('-', ' ')
         station_name1 = ''.join([el for el in station_name1 if el == ' ' or el.isalnum()])
+        logging.info(station_name1)
 
         if station_name1 == station_name:
             res['response']['text'] = 'Вы выбрали станцию "{}".\n' \
