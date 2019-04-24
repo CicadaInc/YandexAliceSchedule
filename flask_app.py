@@ -2,7 +2,6 @@ from flask import Flask, request
 import logging
 import json
 import requests
-from datetime import datetime
 
 app = Flask(__name__)
 
@@ -90,7 +89,7 @@ def handle_dialog(res, req):
         else:
             # Receiving the schedule of the specified station, date and time
 
-            handle_datetime(res, entities, user_id)
+            handle_datetime(res, user_id, tokens)
 
         if not res['response']['end_session']:
             set_help_buttons(user_id, res)
@@ -160,24 +159,15 @@ def time_normalization(hour, minute):
     return hour + ':' + minute
 
 
-def handle_datetime(res, entities, user_id):
+def handle_datetime(res, user_id, tokens):
     # This function to format and handle date and time (write them in storage)
 
-    try:
-        for entity in entities:
-            if entity['type'] == 'YANDEX.DATETIME':
-                sessionStorage[user_id]['date'] = date_normalization(str(entity['value']['day']),
-                                                                     str(entity['value']['month']),
-                                                                     str(entity['value']['year']))
-                sessionStorage[user_id]['time'] = time_normalization(str(entity['value']['hour']),
-                                                                     str(entity['value']['minute']))
+    # Without entities because this entities is genial, really genial, really don't work
+    day, month, year, hour, minute = tokens
+    sessionStorage[user_id]['date'] = date_normalization(day, month, year)
+    sessionStorage[user_id]['time'] = time_normalization(hour, minute)
 
-                receive_schedule(res, user_id)
-
-                return
-        raise KeyError
-    except KeyError:
-        res['response']['text'] = 'Я не понимаю. Попробуйте сказать по-другому.'
+    receive_schedule(res, user_id)
 
 
 def handle_station(res, tokens, user_id):
@@ -198,7 +188,7 @@ def handle_station(res, tokens, user_id):
             res['response']['text'] = 'Вы выбрали станцию "{}".\n' \
                                       'Теперь скажите мне нужные вам дату и время\n' \
                                       'Например: \"Пятое третье две тысячи девятнадцатое ' \
-                                      'ноль часов ноль минут\".'.format(station_name1)
+                                      'ноль часов ноль минут\" (<день> <мес> <год> <часы> <мин>).'.format(station_name1)
 
             sessionStorage[user_id]['true_station'] = True
             sessionStorage[user_id]['station'] = station
