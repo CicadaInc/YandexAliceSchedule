@@ -42,6 +42,7 @@ def handle_dialog(res, req):
         sessionStorage[user_id]['geo_response'] = None
         sessionStorage[user_id]['true_address'] = False
         sessionStorage[user_id]['true_station'] = False
+        sessionStorage[user_id]['transport_type'] = False
         sessionStorage[user_id]['test'] = True
         sessionStorage[user_id]['try'] = 0
 
@@ -65,6 +66,11 @@ def handle_dialog(res, req):
             sessionStorage[user_id]['try'] = 0
 
             res['response']['text'] = 'Скажите адрес, от которого будет происходить поиск станций'
+
+        elif {'самолёт', 'поезд', 'электричка', 'автобус', 'морской транспорт', 'вертолёт'}.intersection(tokens):
+            sessionStorage[user_id]['transport_type'] = False
+
+            res['response']['text'] = 'Отлично! Найти ближайшие станции или по ключевому слову?'
 
         elif {'изменить', 'станцию'}.issubset(tokens) or {'другую', 'станцию'}.issubset(tokens):
             sessionStorage[user_id]['true_station'] = False
@@ -243,7 +249,11 @@ def handle_address(res, tokens, user_id):
     elif 'да' in tokens and 'нет' not in tokens:
         # If user confirmed address
 
-        receive_stations(user_id, res)
+        sessionStorage[user_id]['transport_type'] = True
+
+        res['response']['text'] = 'Выберите тип транспорта.'
+
+        # receive_stations(user_id, res)
 
     elif 'нет' in tokens and 'да' not in tokens:
         #  Handle the try to write address
@@ -308,6 +318,34 @@ def set_help_buttons(user_id, res):
     # This function add in response help-buttons according to user status
 
     res['response']['buttons'] = []
+
+    if sessionStorage[user_id]['transport_type']:
+        res['response']['buttons'] += [
+            {
+                'title': 'Самолёт',
+                'hide': True
+            },
+            {
+                'title': 'Поезд',
+                'hide': True
+            },
+            {
+                'title': 'Электричка',
+                'hide': True
+            },
+            {
+                'title': 'Автобус',
+                'hide': True
+            },
+            {
+                'title': 'Морской транспорт',
+                'hide': True
+            },
+            {
+                'title': 'Вертолёт',
+                'hide': True
+            }
+        ]
 
     if sessionStorage[user_id]['test']:
         res['response']['buttons'] += [

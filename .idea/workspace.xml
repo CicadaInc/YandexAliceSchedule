@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="753e9d64-07d5-474b-bb82-839130421cb0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/flask_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/flask_app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/presentation.pptx" beforeDir="false" afterPath="$PROJECT_DIR$/presentation.pptx" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -16,8 +16,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/flask_app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="259">
-              <caret line="49" lean-forward="true" selection-start-line="49" selection-end-line="49" />
+            <state relative-caret-position="242">
+              <caret line="69" column="112" selection-start-line="69" selection-start-column="112" selection-end-line="69" selection-end-column="112" />
               <folding>
                 <element signature="e#0#32#0" expanded="true" />
               </folding>
@@ -29,11 +29,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>sessionStorage[user_id]['date']</find>
-      <find>handle_date</find>
-      <find>handle_station</find>
-      <find>handle_schedule</find>
-      <find>sessionStorage[user_id]['today_date']</find>
       <find>guess</find>
       <find>было все равно</find>
       <find>дит на матчи</find>
@@ -59,6 +54,11 @@
       <find>reserve</find>
       <find>uV</find>
       <find>ljust</find>
+      <find>5 ближай</find>
+      <find>receive_stations</find>
+      <find>да</find>
+      <find>Не поняла ответа. Да или нет?</find>
+      <find>handle_address</find>
     </findStrings>
     <replaceStrings>
       <replace>data</replace>
@@ -150,7 +150,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.SuperHero">
+  <component name="RunManager" selected="Python.flask_app">
     <configuration name="SuperHero" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="YandexAliceSchedule" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -193,27 +193,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="book" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="YandexAliceSchedule" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../telegram" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../telegram/book.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="boom1" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="YandexAliceSchedule" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -227,6 +206,27 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../solve/boom1.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="flask_app" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="YandexAliceSchedule" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/flask_app.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -258,11 +258,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.flask_app" />
         <item itemvalue="Python.SuperHero" />
         <item itemvalue="Python.book (1)" />
         <item itemvalue="Python.test" />
         <item itemvalue="Python.boom1" />
-        <item itemvalue="Python.book" />
       </list>
     </recent_temporary>
   </component>
@@ -516,8 +516,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/flask_app.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="259">
-          <caret line="49" lean-forward="true" selection-start-line="49" selection-end-line="49" />
+        <state relative-caret-position="242">
+          <caret line="69" column="112" selection-start-line="69" selection-start-column="112" selection-end-line="69" selection-end-column="112" />
           <folding>
             <element signature="e#0#32#0" expanded="true" />
           </folding>
