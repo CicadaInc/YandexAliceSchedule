@@ -15,8 +15,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/flask_app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="68">
-              <caret line="328" lean-forward="true" selection-start-line="328" selection-end-line="328" />
+            <state relative-caret-position="191">
+              <caret line="214" column="63" selection-start-line="214" selection-start-column="63" selection-end-line="214" selection-end-column="63" />
               <folding>
                 <element signature="e#0#32#0" expanded="true" />
               </folding>
@@ -28,36 +28,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>TILES</find>
-      <find>create_2axis_arr</find>
-      <find>moveL</find>
-      <find>moveR</find>
-      <find>moveD</find>
-      <find>moveU</find>
-      <find>running</find>
-      <find>player</find>
-      <find>player1</find>
-      <find>added_d</find>
-      <find>draw_outside_tiles</find>
-      <find>r</find>
-      <find>max_wid</find>
-      <find>max_width</find>
-      <find>reserve</find>
-      <find>uV</find>
-      <find>ljust</find>
-      <find>5 ближай</find>
-      <find>да</find>
-      <find>Не поняла ответа. Да или нет?</find>
-      <find>не поня</find>
-      <find>handle_address</find>
-      <find>receive_stations</find>
-      <find>api.rasp.yandex.net</find>
-      <find>trans</find>
-      <find>морск</find>
       <find>/schedule</find>
       <find>tra</find>
       <find>transport_type</find>
       <find>sessionStorage[user_id]['station_type_search']</find>
+      <find>sessionStorage[user_id]['stations_response']['stations'][:5]</find>
+      <find>sessionStorage[user_id]['stations_response']</find>
+      <find>trans</find>
+      <find>по кл</find>
+      <find>ближай</find>
+      <find>receive_stations</find>
+      <find>receiv</find>
+      <find>receive_s</find>
+      <find>receive_st</find>
+      <find>пока</find>
+      <find>res['response']['end_session']</find>
+      <find>rece</find>
+      <find>Изменить адрес</find>
+      <find>изменить адрес</find>
+      <find>адрес</find>
+      <find>изменит</find>
+      <find>бли</find>
+      <find>sessionStorage[user_id]['transport_type'] = False</find>
+      <find>sessionStorage[user_id]['transport_type']</find>
+      <find>Вы имее</find>
+      <find>sessionStorage[user_id]['true_address']</find>
+      <find>Вы выбра</find>
+      <find>handle_station</find>
+      <find>скажите пол</find>
+      <find>sessionStorage[user_id]['nearest_stations_buttons']</find>
+      <find>вы вы</find>
     </findStrings>
     <replaceStrings>
       <replace>data</replace>
@@ -515,8 +515,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/flask_app.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="328" lean-forward="true" selection-start-line="328" selection-end-line="328" />
+        <state relative-caret-position="191">
+          <caret line="214" column="63" selection-start-line="214" selection-start-column="63" selection-end-line="214" selection-end-column="63" />
           <folding>
             <element signature="e#0#32#0" expanded="true" />
           </folding>
