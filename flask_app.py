@@ -44,6 +44,7 @@ def handle_dialog(res, req):
         sessionStorage[user_id]['true_station'] = False
         sessionStorage[user_id]['transport_type'] = False
         sessionStorage[user_id]['test'] = True
+        sessionStorage[user_id]['station_type_search'] = False
         sessionStorage[user_id]['try'] = 0
 
         res['response']['text'] = 'Привет! Я могу рассказать о нужной вам станции! ' \
@@ -67,9 +68,13 @@ def handle_dialog(res, req):
 
             res['response']['text'] = 'Скажите адрес, от которого будет происходить поиск станций'
 
-        elif {'самолёт', 'поезд', 'электричка', 'автобус', 'морской транспорт', 'вертолёт'}.intersection(tokens):
+        elif {'самолёт', 'поезд', 'электричка', 'автобус', 'морской', 'вертолёт'}.intersection(tokens):
             sessionStorage[user_id]['transport_type'] = False
 
+            sessionStorage[user_id]['transport_type_req'] = {'самолёт', 'поезд', 'электричка', 'автобус', 'морской',
+                                                             'вертолёт'}.intersection(tokens)
+
+            sessionStorage[user_id]['station_type_search'] = True
             res['response']['text'] = 'Отлично! Найти ближайшие станции или по ключевому слову?'
 
         elif {'изменить', 'станцию'}.issubset(tokens) or {'другую', 'станцию'}.issubset(tokens):
@@ -106,7 +111,8 @@ def receive_schedule(res, user_id):
     schedule_params = {
         "apikey": "0737b4ea-ad09-4db2-bbc9-fcb2ae2db11a",
         "station": sessionStorage[user_id]['station']['code'],
-        "date": sessionStorage[user_id]['date']
+        "date": sessionStorage[user_id]['date'],
+        "transport_types": sessionStorage[user_id]['transport_type_req']
     }
     sessionStorage[user_id]['schedule_response'] = requests.get(
         "https://api.rasp.yandex.net/v3.0/schedule/",
@@ -253,6 +259,8 @@ def handle_address(res, tokens, user_id):
 
         res['response']['text'] = 'Выберите тип транспорта.'
 
+        sessionStorage[user_id]['true_address'] = True
+
         # receive_stations(user_id, res)
 
     elif 'нет' in tokens and 'да' not in tokens:
@@ -318,6 +326,18 @@ def set_help_buttons(user_id, res):
     # This function add in response help-buttons according to user status
 
     res['response']['buttons'] = []
+
+    if sessionStorage[user_id]['station_type_search']:
+        res['response']['buttons'] += [
+            {
+                'title': 'Ближайшие',
+                'hide': True
+            },
+            {
+                'title': 'По ключевому слову',
+                'hide': True
+            }
+        ]
 
     if sessionStorage[user_id]['transport_type']:
         res['response']['buttons'] += [

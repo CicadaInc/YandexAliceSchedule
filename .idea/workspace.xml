@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="753e9d64-07d5-474b-bb82-839130421cb0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/flask_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/flask_app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/presentation.pptx" beforeDir="false" afterPath="$PROJECT_DIR$/presentation.pptx" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -16,8 +15,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/flask_app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="242">
-              <caret line="69" column="112" selection-start-line="69" selection-start-column="112" selection-end-line="69" selection-end-column="112" />
+            <state relative-caret-position="68">
+              <caret line="328" lean-forward="true" selection-start-line="328" selection-end-line="328" />
               <folding>
                 <element signature="e#0#32#0" expanded="true" />
               </folding>
@@ -29,14 +28,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>guess</find>
-      <find>было все равно</find>
-      <find>дит на матчи</find>
-      <find>жку рассказов</find>
-      <find>change_language</find>
-      <find>translater</find>
-      <find>data1</find>
-      <find>levels</find>
       <find>TILES</find>
       <find>create_2axis_arr</find>
       <find>moveL</find>
@@ -55,10 +46,18 @@
       <find>uV</find>
       <find>ljust</find>
       <find>5 ближай</find>
-      <find>receive_stations</find>
       <find>да</find>
       <find>Не поняла ответа. Да или нет?</find>
+      <find>не поня</find>
       <find>handle_address</find>
+      <find>receive_stations</find>
+      <find>api.rasp.yandex.net</find>
+      <find>trans</find>
+      <find>морск</find>
+      <find>/schedule</find>
+      <find>tra</find>
+      <find>transport_type</find>
+      <find>sessionStorage[user_id]['station_type_search']</find>
     </findStrings>
     <replaceStrings>
       <replace>data</replace>
@@ -516,8 +515,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/flask_app.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="242">
-          <caret line="69" column="112" selection-start-line="69" selection-start-column="112" selection-end-line="69" selection-end-column="112" />
+        <state relative-caret-position="68">
+          <caret line="328" lean-forward="true" selection-start-line="328" selection-end-line="328" />
           <folding>
             <element signature="e#0#32#0" expanded="true" />
           </folding>
