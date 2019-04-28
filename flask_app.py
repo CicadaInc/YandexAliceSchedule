@@ -2,6 +2,7 @@ from flask import Flask, request
 import logging
 import json
 import requests
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -48,7 +49,19 @@ def handle_dialog(res, req):
         sessionStorage[user_id]['nearest_stations_buttons'] = False
         sessionStorage[user_id]['date'] = False
         sessionStorage[user_id]['link_to_trips'] = False
+        sessionStorage[user_id]['day'] = 'schedule'
         sessionStorage[user_id]['try'] = 0
+
+        sessionStorage[user_id]['date_buttons'] = [
+            {
+                'title': 'Сегодня',
+                'hide': True
+            },
+            {
+                'title': 'Завтра',
+                'hide': True
+            }
+        ]
 
         res['response']['text'] = 'Привет! Я могу рассказать о нужной вам станции! ' \
                                   'Скажите адрес, от которого будет происходить поиск станций.'
@@ -115,6 +128,16 @@ def handle_dialog(res, req):
 
             sessionStorage[user_id]['transport_type'] = False
 
+        elif 'сегодня' in tokens:
+            sessionStorage[user_id]['date'] = str(datetime.today())[:10]
+            sessionStorage[user_id]['day'] = 'today'
+            receive_schedule(res, user_id)
+
+        elif 'завтра' in tokens:
+            sessionStorage[user_id]['date'] = str(datetime.today())[:10]
+            sessionStorage[user_id]['day'] = 'tomorrow'
+            receive_schedule(res, user_id)
+
         elif 'ближайшие' in tokens and 'ключевому' not in tokens:
             receive_stations(user_id, res)
 
@@ -129,13 +152,14 @@ def handle_dialog(res, req):
         elif not sessionStorage[user_id]['true_station']:
             handle_station(res, tokens, user_id)
 
+        elif {'посмотреть', 'рейсы'}.issubset(tokens):
+            res['response']['text'] = 'Открываю'
+
         else:
             # Receiving the schedule of the specified station, date and time
 
             if handle_datetime(res, user_id, entities):
                 receive_schedule(res, user_id)
-            elif {'псмотреть', 'рейсы'}.issubset(tokens):
-                res['response']['text'] = 'Открываю'
             else:
                 res['response']['text'] = 'Я не понимаю. Попробуйте сказать по-другому.'
 
@@ -156,13 +180,11 @@ def receive_schedule(res, user_id):
         params=schedule_params).json()
 
     link = 'https://rasp.yandex.ru/station/' + sessionStorage[user_id]['station']['code'][1:] + '/?start=' + \
-           sessionStorage[user_id]['date'].replace('.', '-')
+           sessionStorage[user_id]['date'].replace('.', '-') + '&span=' + sessionStorage[user_id]['day']
 
     sessionStorage[user_id]['link_to_trips'] = link
 
     res['response']['text'] = 'Переходите по ссылке в кнопке.'
-
-    print(link)
 
 
 # Date normalization to ISO 8601
@@ -338,6 +360,9 @@ def set_help_buttons(user_id, res):
     # This function add in response help-buttons according to user status
 
     res['response']['buttons'] = []
+
+    if sessionStorage[user_id]['true_station'] and sessionStorage[user_id]['link_to_trips'] is False:
+        res['response']['buttons'] += sessionStorage[user_id]['date_buttons']
 
     if sessionStorage[user_id]['link_to_trips'] is not False:
         res['response']['buttons'] += [
