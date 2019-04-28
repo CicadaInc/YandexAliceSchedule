@@ -63,20 +63,39 @@ def handle_dialog(res, req):
 
         if {'изменить', 'адрес'}.issubset(tokens) or {'другой', 'адрес'}.issubset(tokens):
             # User want to edit the address (come back to begin of address select)
+            sessionStorage[user_id]['transport_type'] = False
             sessionStorage[user_id]['true_address'] = False
             sessionStorage[user_id]['true_station'] = False
             sessionStorage[user_id]['geo_response'] = None
+            sessionStorage[user_id]['link_to_trips'] = False
+            sessionStorage[user_id]['station_type_search'] = False
+            sessionStorage[user_id]['nearest_stations_buttons'] = False
             sessionStorage[user_id]['test'] = True
+            sessionStorage[user_id]['date'] = False
             sessionStorage[user_id]['try'] = 0
 
             res['response']['text'] = 'Скажите адрес, от которого будет происходить поиск станций'
 
         elif {'изменить', 'тип', 'транспорта'}.issubset(tokens) or {'изменить', 'транспорт'}.issubset(tokens):
+            # That data needs to clean to start searching again
             sessionStorage[user_id]['transport_type'] = True
+            sessionStorage[user_id]['link_to_trips'] = False
+            sessionStorage[user_id]['true_station'] = False
+            sessionStorage[user_id]['date'] = False
+            sessionStorage[user_id]['nearest_stations_buttons'] = False
+            sessionStorage[user_id]['station_type_search'] = False
 
             res['response']['text'] = 'Выберите тип транспорта.'
 
+        elif {'изменить', 'станцию'}.issubset(tokens) or {'другую', 'станцию'}.issubset(tokens):
+            sessionStorage[user_id]['true_station'] = False
+            sessionStorage[user_id]['date'] = False
+            sessionStorage[user_id]['nearest_stations_buttons'] = False
+
+            receive_stations(user_id, res)
+
         elif {'самолёт', 'поезд', 'электричка', 'автобус', 'морской', 'вертолёт'}.intersection(tokens):
+            sessionStorage[user_id]['link_to_trips'] = False
             types = {
                 'самолёт': 'plane',
                 'поезд': 'train',
@@ -101,11 +120,6 @@ def handle_dialog(res, req):
 
             sessionStorage[user_id]['station_type_search'] = False
 
-        elif {'изменить', 'станцию'}.issubset(tokens) or {'другую', 'станцию'}.issubset(tokens):
-            sessionStorage[user_id]['true_station'] = False
-
-            receive_stations(user_id, res)
-
         elif not sessionStorage[user_id]['true_address']:
             # User didn't wrote a name of station yet
             sessionStorage[user_id]['true_station'] = False
@@ -120,6 +134,8 @@ def handle_dialog(res, req):
 
             if handle_datetime(res, user_id, entities):
                 receive_schedule(res, user_id)
+            elif {'псмотреть', 'рейсы'}.issubset(tokens):
+                res['response']['text'] = 'Открываю'
             else:
                 res['response']['text'] = 'Я не понимаю. Попробуйте сказать по-другому.'
 
@@ -147,33 +163,6 @@ def receive_schedule(res, user_id):
     res['response']['text'] = 'Переходите по ссылке в кнопке.'
 
     print(link)
-
-    # # Ways sorted by time
-    # ways = []
-    #
-    # try:
-    #     for way in sessionStorage[user_id]['schedule_response']['schedule']:
-    #         # Departure time
-    #         departure = way['departure'][way['departure'].find('T') + 1: way['departure'].find('+')]  # Formatted
-    #         ways.append(way)
-    #
-    #     if len(ways) == 0:
-    #         res['response']['text'] = 'Рейсов не найдено.'
-    #     else:
-    #         ways = ways[:10]  # Nearlier 10 ways
-    #         res['response']['text'] = 'Десять ближайших рейсов:\n\n'
-    #         # Form text response
-    #         for way in ways:
-    #             departure = way['departure'][way['departure'].find('T') + 1: way['departure'].find('+')]
-    #             res['response']['text'] += '{}\nОтправление в {}\n\n'.format(way['thread']['short_title'], departure)
-    #
-    #     res['response']['text'] += 'Можете сказать другие дату и время. ' \
-    #                                'Например: \"Пятое третье две тысячи девятнадцатое ноль часов ноль минут\"' \
-    #                                '(<день> <мес> <год> <часы> <мин>)'
-    # except KeyError:
-    #     res['response'][
-    #         'text'] = 'Указана недопустимая дата.\n' \
-    #                   ' Доступен выбор даты на 30 дней назад и 11 месяцев вперед от текущей даты'
 
 
 # Date normalization to ISO 8601
