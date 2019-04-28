@@ -15,8 +15,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/flask_app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="191">
-              <caret line="214" column="63" selection-start-line="214" selection-start-column="63" selection-end-line="214" selection-end-column="63" />
+            <state relative-caret-position="106">
+              <caret line="146" column="61" selection-start-line="146" selection-start-column="61" selection-end-line="146" selection-end-column="61" />
               <folding>
                 <element signature="e#0#32#0" expanded="true" />
               </folding>
@@ -28,20 +28,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>/schedule</find>
-      <find>tra</find>
-      <find>transport_type</find>
-      <find>sessionStorage[user_id]['station_type_search']</find>
-      <find>sessionStorage[user_id]['stations_response']['stations'][:5]</find>
-      <find>sessionStorage[user_id]['stations_response']</find>
-      <find>trans</find>
-      <find>по кл</find>
-      <find>ближай</find>
-      <find>receive_stations</find>
-      <find>receiv</find>
-      <find>receive_s</find>
-      <find>receive_st</find>
-      <find>пока</find>
       <find>res['response']['end_session']</find>
       <find>rece</find>
       <find>Изменить адрес</find>
@@ -58,6 +44,20 @@
       <find>скажите пол</find>
       <find>sessionStorage[user_id]['nearest_stations_buttons']</find>
       <find>вы вы</find>
+      <find>тепер</find>
+      <find>date_normalization</find>
+      <find>sessionStorage[user_id]['schedule_response']['schedule']</find>
+      <find>handle_schedule</find>
+      <find>data</find>
+      <find>date</find>
+      <find>schedule</find>
+      <find>handle_datetime</find>
+      <find>указана</find>
+      <find>sessionStorage[user_id]['date']</find>
+      <find>link</find>
+      <find>sessionStorage[user_id]['link_to_trips']</find>
+      <find>print</find>
+      <find>receive_schedule</find>
     </findStrings>
     <replaceStrings>
       <replace>data</replace>
@@ -515,8 +515,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/flask_app.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="191">
-          <caret line="214" column="63" selection-start-line="214" selection-start-column="63" selection-end-line="214" selection-end-column="63" />
+        <state relative-caret-position="106">
+          <caret line="146" column="61" selection-start-line="146" selection-start-column="61" selection-end-line="146" selection-end-column="61" />
           <folding>
             <element signature="e#0#32#0" expanded="true" />
           </folding>

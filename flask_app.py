@@ -46,6 +46,8 @@ def handle_dialog(res, req):
         sessionStorage[user_id]['test'] = True
         sessionStorage[user_id]['station_type_search'] = False
         sessionStorage[user_id]['nearest_stations_buttons'] = False
+        sessionStorage[user_id]['date'] = False
+        sessionStorage[user_id]['link_to_trips'] = False
         sessionStorage[user_id]['try'] = 0
 
         res['response']['text'] = 'Привет! Я могу рассказать о нужной вам станции! ' \
@@ -116,7 +118,10 @@ def handle_dialog(res, req):
         else:
             # Receiving the schedule of the specified station, date and time
 
-            handle_datetime(res, user_id, tokens)
+            if handle_datetime(res, user_id, entities):
+                receive_schedule(res, user_id)
+            else:
+                res['response']['text'] = 'Я не понимаю. Попробуйте сказать по-другому.'
 
         if not res['response']['end_session']:
             set_help_buttons(user_id, res)
@@ -134,39 +139,41 @@ def receive_schedule(res, user_id):
         "https://api.rasp.yandex.net/v3.0/schedule/",
         params=schedule_params).json()
 
-    # User time
-    user_time = sessionStorage[user_id]['time']  # Formatted
-    h1, m1 = map(int, user_time.split(':'))  # Integer
+    link = 'https://rasp.yandex.ru/station/' + sessionStorage[user_id]['station']['code'][1:] + '/?start=' + \
+           sessionStorage[user_id]['date'].replace('.', '-')
 
-    # Ways sorted by time
-    ways = []
+    sessionStorage[user_id]['link_to_trips'] = link
 
-    try:
-        for way in sessionStorage[user_id]['schedule_response']['schedule']:
-            # Departure time
-            departure = way['departure'][way['departure'].find('T') + 1: way['departure'].find('+')]  # Formatted
-            h2, m2 = map(int, departure.split(':')[:-1])  # Integer
+    res['response']['text'] = 'Переходите по ссылке в кнопке.'
 
-            # If departure time is later then user's time
-            if h2 > h1 or (h2 == h1 and m2 >= m1):
-                ways.append(way)
+    print(link)
 
-        if len(ways) == 0:
-            res['response']['text'] = 'Рейсов не найдено. '
-        else:
-            ways = ways[:10]  # Nearlier 10 ways
-            res['response']['text'] = 'Десять ближайших рейсов:\n\n'
-            # Form text response
-            for way in ways:
-                departure = way['departure'][way['departure'].find('T') + 1: way['departure'].find('+')]
-                res['response']['text'] += '{}\nОтправление в {}\n\n'.format(way['thread']['short_title'], departure)
-        res['response']['text'] += 'Можете сказать другие дату и время. ' \
-                                   'Например: \"Пятое третье две тысячи девятнадцатое ноль часов ноль минут\"' \
-                                   '(<день> <мес> <год> <часы> <мин>)'
-    except KeyError:
-        res['response'][
-            'text'] = 'Указана недопустимая дата.\n' \
-                      ' Доступен выбор даты на 30 дней назад и 11 месяцев вперед от текущей даты'
+    # # Ways sorted by time
+    # ways = []
+    #
+    # try:
+    #     for way in sessionStorage[user_id]['schedule_response']['schedule']:
+    #         # Departure time
+    #         departure = way['departure'][way['departure'].find('T') + 1: way['departure'].find('+')]  # Formatted
+    #         ways.append(way)
+    #
+    #     if len(ways) == 0:
+    #         res['response']['text'] = 'Рейсов не найдено.'
+    #     else:
+    #         ways = ways[:10]  # Nearlier 10 ways
+    #         res['response']['text'] = 'Десять ближайших рейсов:\n\n'
+    #         # Form text response
+    #         for way in ways:
+    #             departure = way['departure'][way['departure'].find('T') + 1: way['departure'].find('+')]
+    #             res['response']['text'] += '{}\nОтправление в {}\n\n'.format(way['thread']['short_title'], departure)
+    #
+    #     res['response']['text'] += 'Можете сказать другие дату и время. ' \
+    #                                'Например: \"Пятое третье две тысячи девятнадцатое ноль часов ноль минут\"' \
+    #                                '(<день> <мес> <год> <часы> <мин>)'
+    # except KeyError:
+    #     res['response'][
+    #         'text'] = 'Указана недопустимая дата.\n' \
+    #                   ' Доступен выбор даты на 30 дней назад и 11 месяцев вперед от текущей даты'
 
 
 # Date normalization to ISO 8601
@@ -181,32 +188,19 @@ def date_normalization(day, month, year):
     return year + '-' + month + '-' + day
 
 
-# Time normalization to ISO 8601
-def time_normalization(hour, minute):
-    # String time formatting
-
-    if len(hour) == 1:
-        hour = '0' + hour
-    if len(minute) == 1:
-        minute = '0' + minute
-
-    return hour + ':' + minute
-
-
-def handle_datetime(res, user_id, tokens):
+def handle_datetime(res, user_id, entities):
     # This function to format and handle date and time (write them in storage)
+    for entity in entities:
+        if entity['type'] == 'YANDEX.DATETIME':
+            sessionStorage[user_id]['date'] = '{}.{}.{}'.format(entity['value']['year'], entity['value']['month'],
+                                                                entity['value']['day'])
 
-    try:
-        # Without entities because this entities is genial, really genial, really don't work
-        day, month, year, hour, minute = tokens
-        sessionStorage[user_id]['date'] = date_normalization(day, month, year)
-        sessionStorage[user_id]['time'] = time_normalization(hour, minute)
+            # res['response']['text'] = '{}.{}.{}'.format(entity['value']['day'], entity['value']['month'],
+            #                                             entity['value']['year'])
 
-        receive_schedule(res, user_id)
-    except ValueError:
-        res['response']['text'] = 'Я вас не понимаю. Скажите правильно!\n' \
-                                  'Например: \"Пятое третье две тысячи девятнадцатое ноль часов ноль минут\"' \
-                                  '(<день> <мес> <год> <часы> <мин>)'
+            sessionStorage[user_id]['true_date'] = True
+            return True
+    return False
 
 
 def handle_station(res, tokens, user_id):
@@ -227,9 +221,7 @@ def handle_station(res, tokens, user_id):
 
         if station_name1 == station_name:
             res['response']['text'] = 'Вы выбрали станцию "{}".\n' \
-                                      'Теперь скажите мне нужные вам дату и время\n' \
-                                      'Например: \"Пятое третье две тысячи девятнадцатое ' \
-                                      'ноль часов ноль минут\" (<день> <мес> <год> <часы> <мин>).'.format(station_name1)
+                                      'Теперь назовите нужную дату.'.format(station_name1)
 
             sessionStorage[user_id]['true_station'] = True
             sessionStorage[user_id]['station'] = station
@@ -237,7 +229,7 @@ def handle_station(res, tokens, user_id):
             return
 
     # We didn't find requested station
-    res['response']['text'] = 'Указанной станции не найдено. Скажите полное имя станции'
+    res['response']['text'] = 'Указанной станции не найдено. Назовите полное имя станции.'
 
 
 def handle_address(res, tokens, user_id):
@@ -357,6 +349,15 @@ def set_help_buttons(user_id, res):
     # This function add in response help-buttons according to user status
 
     res['response']['buttons'] = []
+
+    if sessionStorage[user_id]['link_to_trips'] is not False:
+        res['response']['buttons'] += [
+            {
+                'title': 'Посмотреть рейсы',
+                'url': sessionStorage[user_id]['link_to_trips'],
+                'hide': True
+            }
+        ]
 
     if type(sessionStorage[user_id]['nearest_stations_buttons']) == list:
         res['response']['buttons'] += sessionStorage[user_id]['nearest_stations_buttons']
