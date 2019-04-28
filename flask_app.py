@@ -50,6 +50,8 @@ def handle_dialog(res, req):
         sessionStorage[user_id]['date'] = False
         sessionStorage[user_id]['link_to_trips'] = False
         sessionStorage[user_id]['day'] = 'schedule'
+        sessionStorage[user_id]['key_word'] = False
+        sessionStorage[user_id]['other_key'] = False
         sessionStorage[user_id]['try'] = 0
 
         sessionStorage[user_id]['date_buttons'] = [
@@ -74,7 +76,10 @@ def handle_dialog(res, req):
         tokens = req['request']['nlu']['tokens']
         entities = req['request']['nlu']['entities']
 
-        if {'изменить', 'адрес'}.issubset(tokens) or {'другой', 'адрес'}.issubset(tokens):
+        if sessionStorage[user_id]['key_word']:
+            receive_stations_by_key(user_id, res, tokens)
+
+        elif {'изменить', 'адрес'}.issubset(tokens) or {'другой', 'адрес'}.issubset(tokens):
             # User want to edit the address (come back to begin of address select)
             sessionStorage[user_id]['transport_type'] = False
             sessionStorage[user_id]['true_address'] = False
@@ -106,6 +111,10 @@ def handle_dialog(res, req):
             sessionStorage[user_id]['nearest_stations_buttons'] = False
 
             receive_stations(user_id, res)
+
+        elif {'другое', 'слово'}.issubset(tokens):
+            sessionStorage[user_id]['key_word'] = True
+            res['response']['text'] = 'Слушаю'
 
         elif {'самолёт', 'поезд', 'электричка', 'автобус', 'морской', 'вертолёт'}.intersection(tokens):
             sessionStorage[user_id]['link_to_trips'] = False
@@ -142,6 +151,14 @@ def handle_dialog(res, req):
             receive_stations(user_id, res)
 
             sessionStorage[user_id]['station_type_search'] = False
+
+        elif 'ближайшие' not in tokens and 'ключевому' in tokens:
+            sessionStorage[user_id]['station_type_search'] = False
+            sessionStorage[user_id]['other_key'] = False
+
+            res['response']['text'] = 'Назовите ключевое слово'
+
+            sessionStorage[user_id]['key_word'] = True
 
         elif not sessionStorage[user_id]['true_address']:
             # User didn't wrote a name of station yet
@@ -315,6 +332,55 @@ def handle_address(res, tokens, user_id):
         res['response']['text'] = 'Не поняла ответа. Да или нет?'
 
 
+def receive_stations_by_key(user_id, res, tokens):
+    sessionStorage[user_id]['true_address'] = True  # Valid address
+
+    sessionStorage[user_id]['key_word'] = False
+
+    user_try = sessionStorage[user_id]['try']
+    lng, lat = sessionStorage[user_id]['geo_response']['GeoObjectCollection']['featureMember'][
+        user_try]["GeoObject"]["Point"]["pos"].split()
+
+    #  Find the five nearest stations
+    schedule_params = {
+        'apikey': '0737b4ea-ad09-4db2-bbc9-fcb2ae2db11a',
+        'transport_types': sessionStorage[user_id]['transport_type_req'],
+        'lat': lat,
+        'lng': lng
+    }
+    sessionStorage[user_id]['stations_response'] = requests.get(
+        "https://api.rasp.yandex.net/v3.0/nearest_stations/",
+        params=schedule_params).json()
+    stations = sessionStorage[user_id]['stations_response']['stations'][:5]
+
+    sessionStorage[user_id]['nearest_stations_buttons'] = []
+
+    text_response = 'Первые найденые совпадения: \n\n'
+    for station in stations:
+
+        print(set(tokens))
+        print(set(str(station['station_type_name'] + station['title']).split()))
+
+        if set(tokens).issubset(set(str(station['station_type_name'] + station['title']).split())):
+            distance = round(station['distance'], 3)
+            text_response += '{} {}\n' \
+                             'Расстояние: {} км\n\n'.format(station['station_type_name'], station['title'], distance)
+            sessionStorage[user_id]['nearest_stations_buttons'] += [
+                {
+                    'title': station['station_type_name'] + ' ' + station['title'],
+                    'hide': True
+                }
+            ]
+
+    if len(sessionStorage[user_id]['nearest_stations_buttons']) != 0:
+        text_response += 'Скажите полное имя станции, чтобы узнать расписание ее рейсов.'
+
+        res['response']['text'] = text_response
+    else:
+        res['response']['text'] = 'Таких станций не найдено.'
+        sessionStorage[user_id]['other_key'] = True
+
+
 def receive_stations(user_id, res):
     sessionStorage[user_id]['true_address'] = True  # Valid address
 
@@ -360,6 +426,14 @@ def set_help_buttons(user_id, res):
     # This function add in response help-buttons according to user status
 
     res['response']['buttons'] = []
+
+    if sessionStorage[user_id]['other_key']:
+        res['response']['buttons'] += [
+            {
+                'title': 'Другое слово',
+                'hide': True
+            }
+        ]
 
     if sessionStorage[user_id]['true_station'] and sessionStorage[user_id]['link_to_trips'] is False:
         res['response']['buttons'] += sessionStorage[user_id]['date_buttons']
