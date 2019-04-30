@@ -89,6 +89,7 @@ def handle_dialog(res, req):
             sessionStorage[user_id]['link_to_trips'] = False
             sessionStorage[user_id]['station_type_search'] = False
             sessionStorage[user_id]['nearest_stations_buttons'] = False
+            sessionStorage[user_id]['other_key'] = False
             sessionStorage[user_id]['test'] = True
             sessionStorage[user_id]['date'] = False
             sessionStorage[user_id]['try'] = 0
@@ -100,6 +101,7 @@ def handle_dialog(res, req):
             sessionStorage[user_id]['transport_type'] = True
             sessionStorage[user_id]['link_to_trips'] = False
             sessionStorage[user_id]['true_station'] = False
+            sessionStorage[user_id]['other_key'] = False
             sessionStorage[user_id]['date'] = False
             sessionStorage[user_id]['nearest_stations_buttons'] = False
             sessionStorage[user_id]['station_type_search'] = False
@@ -110,12 +112,14 @@ def handle_dialog(res, req):
             sessionStorage[user_id]['true_station'] = False
             sessionStorage[user_id]['date'] = False
             sessionStorage[user_id]['nearest_stations_buttons'] = False
+            sessionStorage[user_id]['other_key'] = False
 
             receive_stations(user_id, res)
 
         elif {'другое', 'слово'}.issubset(tokens):
             sessionStorage[user_id]['key_word'] = True
             res['response']['text'] = 'Слушаю'
+            sessionStorage[user_id]['other_key'] = False
 
         elif {'самолёт', 'поезд', 'электричка', 'автобус', 'морской', 'вертолёт'}.intersection(tokens):
             sessionStorage[user_id]['link_to_trips'] = False

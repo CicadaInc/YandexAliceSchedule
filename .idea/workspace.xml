@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="753e9d64-07d5-474b-bb82-839130421cb0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/flask_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/flask_app.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -16,10 +15,22 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/flask_app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="182">
-              <caret line="548" lean-forward="true" selection-start-line="548" selection-end-line="548" />
+            <state relative-caret-position="233">
+              <caret line="117" lean-forward="true" selection-start-line="117" selection-end-line="117" />
               <folding>
                 <element signature="e#0#32#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../../solve/telegram/book.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="124">
+              <caret line="8" lean-forward="true" selection-start-line="8" selection-end-line="8" />
+              <folding>
+                <element signature="e#34#107#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -38,9 +49,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>by_</find>
-      <find>by</find>
-      <find>пять</find>
       <find>ключевое</find>
       <find>другое</find>
       <find>указа</find>
@@ -68,6 +76,9 @@
       <find>5 ближайших станций:</find>
       <find>:5</find>
       <find>INFO</find>
+      <find>guess</find>
+      <find>другое сл</find>
+      <find>sessionStorage[user_id]['other_key']</find>
     </findStrings>
     <replaceStrings>
       <replace>data</replace>
@@ -556,10 +567,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/../../solve/telegram/book.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../solve/telegram/book.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="124">
+          <caret line="8" lean-forward="true" selection-start-line="8" selection-end-line="8" />
+          <folding>
+            <element signature="e#34#107#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/flask_app.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="182">
-          <caret line="548" lean-forward="true" selection-start-line="548" selection-end-line="548" />
+        <state relative-caret-position="233">
+          <caret line="117" lean-forward="true" selection-start-line="117" selection-end-line="117" />
           <folding>
             <element signature="e#0#32#0" expanded="true" />
           </folding>
