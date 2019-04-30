@@ -3,6 +3,7 @@ import logging
 import json
 import requests
 from datetime import datetime
+import re
 
 app = Flask(__name__)
 
@@ -241,7 +242,7 @@ def handle_station(res, tokens, user_id):
 
     logging.info(station_name)
 
-    for station in sessionStorage[user_id]['stations_response']['stations'][:5]:
+    for station in sessionStorage[user_id]['stations_response']['stations'][:3]:
         # Name from json-request
         station_name1 = '{} {}'.format(station['station_type_name'], station['title']).lower().replace('-', ' ')
         station_name1 = ''.join([el for el in station_name1 if el == ' ' or el.isalnum()])
@@ -351,17 +352,24 @@ def receive_stations_by_key(user_id, res, tokens):
     sessionStorage[user_id]['stations_response'] = requests.get(
         "https://api.rasp.yandex.net/v3.0/nearest_stations/",
         params=schedule_params).json()
-    stations = sessionStorage[user_id]['stations_response']['stations'][:5]
+    stations = sessionStorage[user_id]['stations_response']['stations'][:3]
 
     sessionStorage[user_id]['nearest_stations_buttons'] = []
 
     text_response = 'Первые найденые совпадения: \n\n'
     for station in stations:
 
-        print(set(tokens))
-        print(set(str(station['station_type_name'] + station['title']).split()))
+        # print(set(tokens))
+        # print(set(str(station['station_type_name'] + station['title']).split()))
 
-        if set(tokens).issubset(set(str(station['station_type_name'] + station['title']).split())):
+        tokens = normalization(tokens)
+        station_tok = normalization(str(station['station_type_name'] + station['title']).split())
+
+        print(tokens)
+        print(station_tok)
+        print(set(tokens).issubset(set(station_tok)))
+
+        if set(tokens).issubset(set(station_tok)):
             distance = round(station['distance'], 3)
             text_response += '{} {}\n' \
                              'Расстояние: {} км\n\n'.format(station['station_type_name'], station['title'], distance)
@@ -398,11 +406,11 @@ def receive_stations(user_id, res):
     sessionStorage[user_id]['stations_response'] = requests.get(
         "https://api.rasp.yandex.net/v3.0/nearest_stations/",
         params=schedule_params).json()
-    stations = sessionStorage[user_id]['stations_response']['stations'][:5]
+    stations = sessionStorage[user_id]['stations_response']['stations'][:3]
 
     sessionStorage[user_id]['nearest_stations_buttons'] = []
 
-    text_response = '5 ближайших станций: \n\n'
+    text_response = 'Ближайшие станции: \n\n'
     for station in stations:
         distance = round(station['distance'], 3)
         text_response += '{} {}\n' \
@@ -417,6 +425,7 @@ def receive_stations(user_id, res):
     if len(sessionStorage[user_id]['nearest_stations_buttons']) != 0:
         text_response += 'Скажите полное имя станции, чтобы узнать расписание ее рейсов'
 
+        sessionStorage[user_id]['other_key'] = False
         res['response']['text'] = text_response
     else:
         res['response']['text'] = 'Таких станций не найдено.'
@@ -531,6 +540,19 @@ def set_help_buttons(user_id, res):
                 'hide': True
             }
         ]
+
+
+# Функция на замену спец символов
+def clearWord(word):
+    return re.sub('[?!#;:*()-+=»«`~.,<>[]|] \t', '', word)
+
+
+def normalization(lst):
+    loc = []
+    for item in lst:
+        loc.append(clearWord(item.strip().lower()))
+
+    return loc
 
 
 if __name__ == "__main__":

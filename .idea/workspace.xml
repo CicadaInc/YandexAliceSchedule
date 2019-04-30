@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="753e9d64-07d5-474b-bb82-839130421cb0" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/flask_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/flask_app.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -15,11 +16,20 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/flask_app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="153">
-              <caret line="333" selection-start-line="333" selection-end-line="333" />
+            <state relative-caret-position="182">
+              <caret line="548" lean-forward="true" selection-start-line="548" selection-end-line="548" />
               <folding>
                 <element signature="e#0#32#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../../telegram/dialogs/app.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="403">
+              <caret line="48" lean-forward="true" selection-start-line="48" selection-end-line="48" />
             </state>
           </provider>
         </entry>
@@ -28,36 +38,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>станц</find>
-      <find>sessionStorage[user_id]['station']</find>
-      <find>транспор</find>
-      <find>Теперь назовите нужную дату.</find>
-      <find>Тепер</find>
-      <find>sessionStorage[user_id]['true_station']</find>
-      <find>сегоднгя</find>
-      <find>sessionStorage[user_id]['date_buttons']</find>
-      <find>ctuj</find>
-      <find>start</find>
-      <find>посмотрет</find>
-      <find>сегодня</find>
-      <find>link</find>
-      <find>receive_schedule</find>
-      <find>handle_datetime</find>
-      <find>handle_station</find>
-      <find>ближай</find>
-      <find>sessionStorage[user_id]['station_type_search']</find>
-      <find>ключево</find>
-      <find>pass</find>
-      <find>issubset</find>
-      <find>receive_stations</find>
-      <find>sessionStorage[user_id]['nearest_stations_buttons']</find>
-      <find>ключ</find>
-      <find>passreceive_stations_by_key(user_id, res, tokens)</find>
       <find>by_</find>
       <find>by</find>
       <find>пять</find>
       <find>ключевое</find>
+      <find>другое</find>
+      <find>указа</find>
+      <find>handle_station</find>
+      <find>сыграем</find>
+      <find>Неп</find>
+      <find>неправ</find>
+      <find>а в как</find>
+      <find>sessionStorage[user_id]['guess_country']</find>
+      <find>req</find>
+      <find>вот те</find>
+      <find>помо</find>
+      <find>пра</find>
+      <find>росс</find>
+      <find>countr</find>
+      <find>country</find>
+      <find>ConversationHandler</find>
+      <find>locals</find>
+      <find>ключ</find>
+      <find>key_word</find>
       <find>receive_stations_by_key</find>
+      <find>re</find>
+      <find>sub</find>
+      <find>print</find>
+      <find>5 ближайших станций:</find>
+      <find>:5</find>
+      <find>INFO</find>
     </findStrings>
     <replaceStrings>
       <replace>data</replace>
@@ -75,6 +85,7 @@
       <replace>max_wid</replace>
       <replace>player_copy</replace>
       <replace>up_pos</replace>
+      <replace>:3</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -93,6 +104,9 @@
         <option value="$PROJECT_DIR$/../../test.py" />
         <option value="$PROJECT_DIR$/../../telegram/telegram/book.py" />
         <option value="$PROJECT_DIR$/../../PG/Новая папка/SuperHero.py" />
+        <option value="$PROJECT_DIR$/../../API_Alice/translator.py" />
+        <option value="$PROJECT_DIR$/../../API_Alice/flask_app.py" />
+        <option value="$PROJECT_DIR$/../../telegram/dialogs/app.py" />
         <option value="$PROJECT_DIR$/flask_app.py" />
       </list>
     </option>
@@ -118,7 +132,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -130,6 +143,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -149,7 +163,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.flask_app">
+  <component name="RunManager" selected="Python.app">
     <configuration name="SuperHero" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="YandexAliceSchedule" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -171,6 +185,27 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="app" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="YandexAliceSchedule" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../telegram/dialogs" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../telegram/dialogs/app.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="book (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="YandexAliceSchedule" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -184,27 +219,6 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../telegram/telegram/book.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="boom1" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="YandexAliceSchedule" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../solve" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../solve/boom1.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -257,11 +271,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.app" />
         <item itemvalue="Python.flask_app" />
         <item itemvalue="Python.SuperHero" />
         <item itemvalue="Python.book (1)" />
         <item itemvalue="Python.test" />
-        <item itemvalue="Python.boom1" />
       </list>
     </recent_temporary>
   </component>
@@ -285,9 +299,10 @@
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Inspection Results" weight="0.329582" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.329582" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.24276528" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39871383" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -313,16 +328,7 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/BigTaskAPI.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-4258">
-          <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
-          <folding>
-            <element signature="e#48#57#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/BigTaskAPI.py" />
     <entry file="file://$PROJECT_DIR$/../../../../eng/eng.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="85">
@@ -462,16 +468,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../../telegram/app.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
-          <caret line="70" column="33" selection-start-line="70" selection-start-column="33" selection-end-line="70" selection-end-column="33" />
-          <folding>
-            <element signature="e#34#107#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../../test.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="162">
@@ -489,16 +485,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../../telegram/telegram/book.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
-          <caret line="79" column="49" selection-start-line="79" selection-start-column="49" selection-end-line="79" selection-end-column="49" />
-          <folding>
-            <element signature="e#34#107#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../../PG/SuperHero.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-348">
@@ -513,10 +499,67 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/../../telegram/telegram/book.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="162">
+          <caret line="73" column="22" selection-end-line="141" />
+          <folding>
+            <element signature="e#34#107#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../telegram/app.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="20" column="68" lean-forward="true" selection-start-line="20" selection-start-column="23" selection-end-line="20" selection-end-column="68" />
+          <folding>
+            <element signature="e#34#107#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../API_Alice/translator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="340">
+          <caret line="65" lean-forward="true" selection-start-line="65" selection-end-line="65" />
+          <folding>
+            <element signature="e#0#32#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../API_Alice/flask_app.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="369">
+          <caret line="91" selection-start-line="91" selection-end-line="91" />
+          <folding>
+            <element signature="e#0#32#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../telegram/dialogs/app.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="403">
+          <caret line="48" lean-forward="true" selection-start-line="48" selection-end-line="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../../../VK/READY/VERSION_1.0_code/Ready_VK.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="124">
+          <caret line="143" selection-start-line="143" selection-end-line="145" selection-end-column="56" />
+          <folding>
+            <element signature="e#229#238#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/flask_app.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="333" selection-start-line="333" selection-end-line="333" />
+        <state relative-caret-position="182">
+          <caret line="548" lean-forward="true" selection-start-line="548" selection-end-line="548" />
           <folding>
             <element signature="e#0#32#0" expanded="true" />
           </folding>
