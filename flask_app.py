@@ -350,7 +350,7 @@ def receive_stations_by_key(user_id, res, tokens):
     schedule_params = {
         'apikey': '0737b4ea-ad09-4db2-bbc9-fcb2ae2db11a',
         'transport_types': sessionStorage[user_id]['transport_type_req'],
-        'distance': 15,
+        'distance': 15,  # we are looking for stations only in our city
         'lat': lat,
         'lng': lng
     }
@@ -405,7 +405,7 @@ def receive_stations(user_id, res):
     schedule_params = {
         'apikey': '0737b4ea-ad09-4db2-bbc9-fcb2ae2db11a',
         'transport_types': sessionStorage[user_id]['transport_type_req'],
-        'distance': 50,
+        'distance': 50,  # this is done to know the nearest stations at a great distance
         'lat': lat,
         'lng': lng
     }
