@@ -350,6 +350,7 @@ def receive_stations_by_key(user_id, res, tokens):
     schedule_params = {
         'apikey': '0737b4ea-ad09-4db2-bbc9-fcb2ae2db11a',
         'transport_types': sessionStorage[user_id]['transport_type_req'],
+        'distance': 15,
         'lat': lat,
         'lng': lng
     }
@@ -404,13 +405,18 @@ def receive_stations(user_id, res):
     schedule_params = {
         'apikey': '0737b4ea-ad09-4db2-bbc9-fcb2ae2db11a',
         'transport_types': sessionStorage[user_id]['transport_type_req'],
+        'distance': 50,
         'lat': lat,
         'lng': lng
     }
     sessionStorage[user_id]['stations_response'] = requests.get(
         "https://api.rasp.yandex.net/v3.0/nearest_stations/",
         params=schedule_params).json()
-    stations = sessionStorage[user_id]['stations_response']['stations'][:3]
+    try:
+        stations = sessionStorage[user_id]['stations_response']['stations'][:3]
+    except Exception:
+        res['response']['text'] = 'Таких станций не найдено.'
+        return
 
     sessionStorage[user_id]['nearest_stations_buttons'] = []
 
