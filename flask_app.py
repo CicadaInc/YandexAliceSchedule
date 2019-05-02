@@ -53,6 +53,7 @@ def handle_dialog(res, req):
         sessionStorage[user_id]['day'] = 'schedule'
         sessionStorage[user_id]['key_word'] = False
         sessionStorage[user_id]['other_key'] = False
+        sessionStorage[user_id]['search'] = False
         sessionStorage[user_id]['try'] = 0
 
         sessionStorage[user_id]['date_buttons'] = [
@@ -92,6 +93,7 @@ def handle_dialog(res, req):
             sessionStorage[user_id]['other_key'] = False
             sessionStorage[user_id]['test'] = True
             sessionStorage[user_id]['date'] = False
+            sessionStorage[user_id]['search'] = False
             sessionStorage[user_id]['try'] = 0
 
             res['response']['text'] = 'Скажите адрес, от которого будет происходить поиск станций'
@@ -104,9 +106,17 @@ def handle_dialog(res, req):
             sessionStorage[user_id]['other_key'] = False
             sessionStorage[user_id]['date'] = False
             sessionStorage[user_id]['nearest_stations_buttons'] = False
+            sessionStorage[user_id]['search'] = False
             sessionStorage[user_id]['station_type_search'] = False
 
             res['response']['text'] = 'Выберите тип транспорта.'
+
+        elif {'изменить', 'тип', 'поиска'}.issubset(tokens):
+            handle_search(res, tokens, user_id)
+            sessionStorage[user_id]['search'] = False
+            sessionStorage[user_id]['other_key'] = False
+            sessionStorage[user_id]['true_station'] = False
+            sessionStorage[user_id]['nearest_stations_buttons'] = False
 
         elif {'изменить', 'станцию'}.issubset(tokens) or {'другую', 'станцию'}.issubset(tokens):
             sessionStorage[user_id]['true_station'] = False
@@ -122,25 +132,10 @@ def handle_dialog(res, req):
             sessionStorage[user_id]['other_key'] = False
 
         elif {'самолёт', 'поезд', 'электричка', 'автобус', 'морской', 'вертолёт'}.intersection(tokens):
-            sessionStorage[user_id]['link_to_trips'] = False
-            types = {
-                'самолёт': 'plane',
-                'поезд': 'train',
-                'электричка': 'suburban',
-                'автобус': 'bus',
-                'морской': 'water',
-                'вертолёт': 'helicopter'
-            }
+            handle_search(res, tokens, user_id)
 
-            sessionStorage[user_id]['transport_type'] = True
-
-            sessionStorage[user_id]['transport_type_req'] = types[str(list(
-                {'самолёт', 'поезд', 'электричка', 'автобус', 'морской', 'вертолёт'}.intersection(tokens))[0])]
-
-            sessionStorage[user_id]['station_type_search'] = True
-            res['response']['text'] = 'Отлично! Найти ближайшие станции или по ключевому слову?'
-
-            sessionStorage[user_id]['transport_type'] = False
+        elif 'молодец' in tokens:
+            res['response']['text'] = 'Как мило. Спасибо!'
 
         elif 'сегодня' in tokens:
             sessionStorage[user_id]['date'] = str(datetime.today())[:10]
@@ -155,6 +150,7 @@ def handle_dialog(res, req):
         elif 'ближайшие' in tokens and 'ключевому' not in tokens:
             receive_stations(user_id, res)
 
+            sessionStorage[user_id]['search'] = True
             sessionStorage[user_id]['station_type_search'] = False
 
         elif 'ближайшие' not in tokens and 'ключевому' in tokens:
@@ -163,6 +159,7 @@ def handle_dialog(res, req):
 
             res['response']['text'] = 'Назовите ключевое слово'
 
+            sessionStorage[user_id]['search'] = True
             sessionStorage[user_id]['key_word'] = True
 
         elif not sessionStorage[user_id]['true_address']:
@@ -183,7 +180,7 @@ def handle_dialog(res, req):
             if handle_datetime(res, user_id, entities):
                 receive_schedule(res, user_id)
             else:
-                res['response']['text'] = 'Я не понимаю. Попробуйте сказать по-другому.'
+                res['response']['text'] = 'Я не понимаю. Попробуйте сказать по-другому или измените команду.'
 
         if not res['response']['end_session']:
             set_help_buttons(user_id, res)
@@ -207,6 +204,29 @@ def receive_schedule(res, user_id):
     sessionStorage[user_id]['link_to_trips'] = link
 
     res['response']['text'] = 'Переходите по ссылке в кнопке.'
+
+
+def handle_search(res, tokens, user_id):
+    sessionStorage[user_id]['link_to_trips'] = False
+    types = {
+        'самолёт': 'plane',
+        'поезд': 'train',
+        'электричка': 'suburban',
+        'автобус': 'bus',
+        'морской': 'water',
+        'вертолёт': 'helicopter'
+    }
+
+    sessionStorage[user_id]['transport_type'] = True
+
+    if not sessionStorage[user_id]['search']:
+        sessionStorage[user_id]['transport_type_req'] = types[str(list(
+            {'самолёт', 'поезд', 'электричка', 'автобус', 'морской', 'вертолёт'}.intersection(tokens))[0])]
+
+    sessionStorage[user_id]['station_type_search'] = True
+    res['response']['text'] = 'Отлично! Найти ближайшие станции или по ключевому слову?'
+
+    sessionStorage[user_id]['transport_type'] = False
 
 
 # Date normalization to ISO 8601
@@ -350,7 +370,7 @@ def receive_stations_by_key(user_id, res, tokens):
     schedule_params = {
         'apikey': '0737b4ea-ad09-4db2-bbc9-fcb2ae2db11a',
         'transport_types': sessionStorage[user_id]['transport_type_req'],
-        'distance': 15,  # we are looking for stations only in our city
+        'distance': 50,  # we are looking for stations only in our city
         'lat': lat,
         'lng': lng
     }
@@ -364,11 +384,8 @@ def receive_stations_by_key(user_id, res, tokens):
     text_response = 'Первые найденые совпадения: \n\n'
     for station in stations:
 
-        # print(set(tokens))
-        # print(set(str(station['station_type_name'] + station['title']).split()))
-
         tokens = normalization(tokens)
-        station_tok = normalization(str(station['station_type_name'] + station['title']).split())
+        station_tok = normalization(str(station['station_type_name'] + ' ' + station['title']).split())
 
         print(tokens)
         print(station_tok)
@@ -513,6 +530,14 @@ def set_help_buttons(user_id, res):
         res['response']['buttons'] += [
             {
                 'title': 'Москва, ул. Льва Толстого, 16',
+                'hide': True
+            }
+        ]
+
+    if sessionStorage[user_id]['search']:
+        res['response']['buttons'] += [
+            {
+                'title': 'Изменить тип поиска',
                 'hide': True
             }
         ]
