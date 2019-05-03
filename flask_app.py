@@ -68,8 +68,9 @@ def handle_dialog(res, req):
                 }
             ]
 
-            res['response']['text'] = 'Привет! Я могу рассказать о нужной вам станции! ' \
-                                      'Скажите адрес, от которого будет происходить поиск станций.'
+            res['response'][
+                'text'] = 'Привет! Я могу рассказать о нужной Вам станции (будь то автобусной, авиастанции и тому подобных)! ' \
+                          'Скажите, где Вы находитесь или адрес, от которого будет происходить поиск станций.'
 
             set_help_buttons(user_id, res)
 
@@ -176,7 +177,8 @@ def handle_dialog(res, req):
                 handle_station(res, tokens, user_id)
 
             elif {'посмотреть', 'рейсы'}.issubset(tokens):
-                res['response']['text'] = 'Открываю'
+                res['response'][
+                    'text'] = 'Открываю. Также Вы можете сейчас ввести другую дату или изменить параметры. Используйте кнопки для удобства.'
 
             else:
                 # Receiving the schedule of the specified station, date and time
