@@ -33,157 +33,164 @@ def main():
 
 
 def handle_dialog(res, req):
-    user_id = req['session']['user_id']
+    try:
+        user_id = req['session']['user_id']
 
-    if req['session']['new']:
+        if req['session']['new']:
 
-        # Empty storage of user
-        sessionStorage[user_id] = {}
+            # Empty storage of user
+            sessionStorage[user_id] = {}
 
-        # User din't wrote any info yet
-        sessionStorage[user_id]['geo_response'] = None
-        sessionStorage[user_id]['true_address'] = False
-        sessionStorage[user_id]['true_station'] = False
-        sessionStorage[user_id]['transport_type'] = False
-        sessionStorage[user_id]['test'] = True
-        sessionStorage[user_id]['station_type_search'] = False
-        sessionStorage[user_id]['nearest_stations_buttons'] = False
-        sessionStorage[user_id]['date'] = False
-        sessionStorage[user_id]['link_to_trips'] = False
-        sessionStorage[user_id]['day'] = 'schedule'
-        sessionStorage[user_id]['key_word'] = False
-        sessionStorage[user_id]['other_key'] = False
-        sessionStorage[user_id]['search'] = False
-        sessionStorage[user_id]['try'] = 0
-
-        sessionStorage[user_id]['date_buttons'] = [
-            {
-                'title': 'Сегодня',
-                'hide': True
-            },
-            {
-                'title': 'Завтра',
-                'hide': True
-            }
-        ]
-
-        res['response']['text'] = 'Привет! Я могу рассказать о нужной вам станции! ' \
-                                  'Скажите адрес, от которого будет происходить поиск станций.'
-
-        set_help_buttons(user_id, res)
-
-    else:
-        # Block to show the races schedule of once station
-
-        tokens = req['request']['nlu']['tokens']
-        entities = req['request']['nlu']['entities']
-
-        if sessionStorage[user_id]['key_word']:
-            receive_stations_by_key(user_id, res, tokens)
-
-        elif {'изменить', 'адрес'}.issubset(tokens) or {'другой', 'адрес'}.issubset(tokens):
-            # User want to edit the address (come back to begin of address select)
-            sessionStorage[user_id]['transport_type'] = False
+            # User din't wrote any info yet
+            sessionStorage[user_id]['geo_response'] = None
             sessionStorage[user_id]['true_address'] = False
             sessionStorage[user_id]['true_station'] = False
-            sessionStorage[user_id]['geo_response'] = None
-            sessionStorage[user_id]['link_to_trips'] = False
+            sessionStorage[user_id]['transport_type'] = False
+            sessionStorage[user_id]['test'] = True
             sessionStorage[user_id]['station_type_search'] = False
             sessionStorage[user_id]['nearest_stations_buttons'] = False
-            sessionStorage[user_id]['other_key'] = False
-            sessionStorage[user_id]['test'] = True
             sessionStorage[user_id]['date'] = False
+            sessionStorage[user_id]['link_to_trips'] = False
+            sessionStorage[user_id]['day'] = 'schedule'
+            sessionStorage[user_id]['key_word'] = False
+            sessionStorage[user_id]['other_key'] = False
             sessionStorage[user_id]['search'] = False
             sessionStorage[user_id]['try'] = 0
 
-            res['response']['text'] = 'Скажите адрес, от которого будет происходить поиск станций'
+            sessionStorage[user_id]['date_buttons'] = [
+                {
+                    'title': 'Сегодня',
+                    'hide': True
+                },
+                {
+                    'title': 'Завтра',
+                    'hide': True
+                }
+            ]
 
-        elif {'изменить', 'тип', 'транспорта'}.issubset(tokens) or {'изменить', 'транспорт'}.issubset(tokens):
-            # That data needs to clean to start searching again
-            sessionStorage[user_id]['transport_type'] = True
-            sessionStorage[user_id]['link_to_trips'] = False
-            sessionStorage[user_id]['true_station'] = False
-            sessionStorage[user_id]['other_key'] = False
-            sessionStorage[user_id]['date'] = False
-            sessionStorage[user_id]['nearest_stations_buttons'] = False
-            sessionStorage[user_id]['search'] = False
-            sessionStorage[user_id]['station_type_search'] = False
+            res['response']['text'] = 'Привет! Я могу рассказать о нужной вам станции! ' \
+                                      'Скажите адрес, от которого будет происходить поиск станций.'
 
-            res['response']['text'] = 'Выберите тип транспорта.'
-
-        elif {'изменить', 'тип', 'поиска'}.issubset(tokens):
-            handle_search(res, tokens, user_id)
-            sessionStorage[user_id]['search'] = False
-            sessionStorage[user_id]['other_key'] = False
-            sessionStorage[user_id]['true_station'] = False
-            sessionStorage[user_id]['nearest_stations_buttons'] = False
-
-        elif {'изменить', 'станцию'}.issubset(tokens) or {'другую', 'станцию'}.issubset(tokens):
-            sessionStorage[user_id]['true_station'] = False
-            sessionStorage[user_id]['date'] = False
-            sessionStorage[user_id]['nearest_stations_buttons'] = False
-            sessionStorage[user_id]['other_key'] = False
-
-            receive_stations(user_id, res)
-
-        elif {'другое', 'слово'}.issubset(tokens):
-            sessionStorage[user_id]['key_word'] = True
-            res['response']['text'] = 'Слушаю'
-            sessionStorage[user_id]['other_key'] = False
-
-        elif {'самолёт', 'поезд', 'электричка', 'автобус', 'морской', 'вертолёт'}.intersection(tokens):
-            handle_search(res, tokens, user_id)
-
-        elif 'молодец' in tokens:
-            res['response']['text'] = 'Как мило. Спасибо!'
-
-        elif 'сегодня' in tokens:
-            sessionStorage[user_id]['date'] = str(datetime.today())[:10]
-            sessionStorage[user_id]['day'] = 'today'
-            receive_schedule(res, user_id)
-
-        elif 'завтра' in tokens:
-            sessionStorage[user_id]['date'] = str(datetime.today())[:10]
-            sessionStorage[user_id]['day'] = 'tomorrow'
-            receive_schedule(res, user_id)
-
-        elif 'ближайшие' in tokens and 'ключевому' not in tokens:
-            receive_stations(user_id, res)
-
-            sessionStorage[user_id]['search'] = True
-            sessionStorage[user_id]['station_type_search'] = False
-
-        elif 'ближайшие' not in tokens and 'ключевому' in tokens:
-            sessionStorage[user_id]['station_type_search'] = False
-            sessionStorage[user_id]['other_key'] = False
-
-            res['response']['text'] = 'Назовите ключевое слово'
-
-            sessionStorage[user_id]['search'] = True
-            sessionStorage[user_id]['key_word'] = True
-
-        elif not sessionStorage[user_id]['true_address']:
-            # User didn't wrote a name of station yet
-            sessionStorage[user_id]['true_station'] = False
-
-            handle_address(res, tokens, user_id)
-
-        elif not sessionStorage[user_id]['true_station']:
-            handle_station(res, tokens, user_id)
-
-        elif {'посмотреть', 'рейсы'}.issubset(tokens):
-            res['response']['text'] = 'Открываю'
+            set_help_buttons(user_id, res)
 
         else:
-            # Receiving the schedule of the specified station, date and time
+            # Block to show the races schedule of once station
 
-            if handle_datetime(res, user_id, entities):
+            tokens = req['request']['nlu']['tokens']
+            entities = req['request']['nlu']['entities']
+
+            if sessionStorage[user_id]['key_word']:
+                receive_stations_by_key(user_id, res, tokens)
+
+            elif {'изменить', 'адрес'}.issubset(tokens) or {'другой', 'адрес'}.issubset(tokens):
+                # User want to edit the address (come back to begin of address select)
+                sessionStorage[user_id]['transport_type'] = False
+                sessionStorage[user_id]['true_address'] = False
+                sessionStorage[user_id]['true_station'] = False
+                sessionStorage[user_id]['geo_response'] = None
+                sessionStorage[user_id]['link_to_trips'] = False
+                sessionStorage[user_id]['station_type_search'] = False
+                sessionStorage[user_id]['nearest_stations_buttons'] = False
+                sessionStorage[user_id]['other_key'] = False
+                sessionStorage[user_id]['test'] = True
+                sessionStorage[user_id]['date'] = False
+                sessionStorage[user_id]['search'] = False
+                sessionStorage[user_id]['try'] = 0
+
+                res['response']['text'] = 'Скажите адрес, от которого будет происходить поиск станций'
+
+            elif {'изменить', 'тип', 'транспорта'}.issubset(tokens) or {'изменить', 'транспорт'}.issubset(tokens):
+                # That data needs to clean to start searching again
+                sessionStorage[user_id]['transport_type'] = True
+                sessionStorage[user_id]['link_to_trips'] = False
+                sessionStorage[user_id]['true_station'] = False
+                sessionStorage[user_id]['other_key'] = False
+                sessionStorage[user_id]['date'] = False
+                sessionStorage[user_id]['nearest_stations_buttons'] = False
+                sessionStorage[user_id]['search'] = False
+                sessionStorage[user_id]['station_type_search'] = False
+
+                res['response']['text'] = 'Выберите тип транспорта.'
+
+            elif {'изменить', 'тип', 'поиска'}.issubset(tokens):
+                handle_search(res, tokens, user_id)
+                sessionStorage[user_id]['search'] = False
+                sessionStorage[user_id]['other_key'] = False
+                sessionStorage[user_id]['true_station'] = False
+                sessionStorage[user_id]['nearest_stations_buttons'] = False
+
+            elif {'изменить', 'станцию'}.issubset(tokens) or {'другую', 'станцию'}.issubset(tokens):
+                sessionStorage[user_id]['true_station'] = False
+                sessionStorage[user_id]['date'] = False
+                sessionStorage[user_id]['nearest_stations_buttons'] = False
+                sessionStorage[user_id]['other_key'] = False
+
+                receive_stations(user_id, res)
+
+            elif {'другое', 'слово'}.issubset(tokens):
+                sessionStorage[user_id]['key_word'] = True
+                res['response']['text'] = 'Слушаю'
+                sessionStorage[user_id]['other_key'] = False
+
+            elif {'самолёт', 'поезд', 'электричка', 'автобус', 'морской', 'вертолёт'}.intersection(tokens):
+                handle_search(res, tokens, user_id)
+
+            elif 'молодец' in tokens:
+                res['response']['text'] = 'Как мило. Спасибо!'
+
+            elif 'отлично' in tokens:
+                res['response']['text'] = 'Я очень рада, что Вам нравится!'
+
+            elif 'сегодня' in tokens:
+                sessionStorage[user_id]['date'] = str(datetime.today())[:10]
+                sessionStorage[user_id]['day'] = 'today'
                 receive_schedule(res, user_id)
-            else:
-                res['response']['text'] = 'Я не понимаю. Попробуйте сказать по-другому или измените команду.'
 
-        if not res['response']['end_session']:
-            set_help_buttons(user_id, res)
+            elif 'завтра' in tokens:
+                sessionStorage[user_id]['date'] = str(datetime.today())[:10]
+                sessionStorage[user_id]['day'] = 'tomorrow'
+                receive_schedule(res, user_id)
+
+            elif 'ближайшие' in tokens and 'ключевому' not in tokens:
+                receive_stations(user_id, res)
+
+                sessionStorage[user_id]['search'] = True
+                sessionStorage[user_id]['station_type_search'] = False
+
+            elif 'ближайшие' not in tokens and 'ключевому' in tokens:
+                sessionStorage[user_id]['station_type_search'] = False
+                sessionStorage[user_id]['other_key'] = False
+
+                res['response']['text'] = 'Назовите ключевое слово'
+
+                sessionStorage[user_id]['search'] = True
+                sessionStorage[user_id]['key_word'] = True
+
+            elif not sessionStorage[user_id]['true_address']:
+                # User didn't wrote a name of station yet
+                sessionStorage[user_id]['true_station'] = False
+
+                handle_address(res, tokens, user_id)
+
+            elif not sessionStorage[user_id]['true_station']:
+                handle_station(res, tokens, user_id)
+
+            elif {'посмотреть', 'рейсы'}.issubset(tokens):
+                res['response']['text'] = 'Открываю'
+
+            else:
+                # Receiving the schedule of the specified station, date and time
+
+                if handle_datetime(res, user_id, entities):
+                    receive_schedule(res, user_id)
+                else:
+                    res['response']['text'] = 'Я не понимаю. Попробуйте сказать по-другому или измените команду.'
+
+            if not res['response']['end_session']:
+                set_help_buttons(user_id, res)
+    except Exception as error:
+        print(str(error))
+        res['response']['text'] = 'Я Вас немного не понимаю, попробуйте сказать по-другому пожалуйста.'
 
 
 def receive_schedule(res, user_id):
@@ -282,7 +289,7 @@ def handle_station(res, tokens, user_id):
             return
 
     # We didn't find requested station
-    res['response']['text'] = 'Указанной станции не найдено. Назовите полное имя станции.'
+    res['response']['text'] = 'Результатов на данный запрос не найдено.'
 
 
 def handle_address(res, tokens, user_id):
