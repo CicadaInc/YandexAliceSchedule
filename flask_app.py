@@ -83,6 +83,10 @@ def handle_dialog(res, req):
             if sessionStorage[user_id]['key_word']:
                 receive_stations_by_key(user_id, res, tokens)
 
+            elif 'помощь' in tokens:
+                res['response'][
+                    'text'] = 'Я могу рассказать Вам информарцию о рейсах на тот или иной день. Следуйте моим указаниям.'
+
             elif {'изменить', 'адрес'}.issubset(tokens) or {'другой', 'адрес'}.issubset(tokens):
                 # User want to edit the address (come back to begin of address select)
                 sessionStorage[user_id]['transport_type'] = False
@@ -178,7 +182,11 @@ def handle_dialog(res, req):
 
             elif {'посмотреть', 'рейсы'}.issubset(tokens):
                 res['response'][
-                    'text'] = 'Открываю. Также Вы можете сейчас ввести другую дату или изменить параметры. Используйте кнопки для удобства.'
+                    'text'] = 'Открываю рейсы. Также Вы можете сейчас ввести другую дату или изменить параметры. Используйте кнопки для удобства.'
+
+            elif {'открыть', 'карты'}.issubset(tokens):
+                res['response'][
+                    'text'] = 'Открываю карты. Также Вы можете сейчас ввести другую дату или изменить параметры. Используйте кнопки для удобства.'
 
             else:
                 # Receiving the schedule of the specified station, date and time
@@ -492,6 +500,14 @@ def set_help_buttons(user_id, res):
             }
         ]
 
+        res['response']['buttons'] += [
+            {
+                'title': 'Открыть карты',
+                'url': 'https://yandex.ru/maps/',
+                'hide': True
+            }
+        ]
+
     if type(sessionStorage[user_id]['nearest_stations_buttons']) == list:
         res['response']['buttons'] += sessionStorage[user_id]['nearest_stations_buttons']
 
@@ -584,6 +600,13 @@ def set_help_buttons(user_id, res):
                 'hide': True
             }
         ]
+
+    res['response']['buttons'] += [
+        {
+            'title': 'Помощь',
+            'hide': True
+        }
+    ]
 
 
 # Функция на замену спец символов
