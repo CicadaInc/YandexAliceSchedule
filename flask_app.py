@@ -83,7 +83,7 @@ def handle_dialog(res, req):
             if sessionStorage[user_id]['key_word']:
                 receive_stations_by_key(user_id, res, tokens)
 
-            elif 'помощь' in tokens:
+            elif 'помощь' in tokens or {'что', 'ты', 'умеешь'}.issubset(tokens):
                 res['response'][
                     'text'] = 'Я могу рассказать Вам информарцию о рейсах на тот или иной день. Следуйте моим указаниям.'
 
